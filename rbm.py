@@ -63,9 +63,8 @@ def hiddenToVisible(h, w):
     #   We only do so when we predict the rating a user would have given to a movie.
     m,F,K = w.shape
     v = np.zeros((m,5))
-    h_values = sample(h)
     for movie in range(m):
-        score = np.matmul(h_values,w[movie,:,:]) # 1 x F * F x 5
+        score = np.matmul(h,w[movie,:,:]) # 1 x F * F x 5
         prob = softmax(score)
         v[movie,] = prob
     return v
