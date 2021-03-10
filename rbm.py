@@ -35,7 +35,7 @@ def sig(x):
     ### TO IMPLEMENT ###
     # x is a real vector of size n
     # ret should be a vector of size n where ret_i = sigmoid(x_i)
-    return None
+    return 1 / (1 + np.exp(-x))
 
 def visibleToHiddenVec(v, w):
     ### TO IMPLEMENT ###
@@ -43,7 +43,13 @@ def visibleToHiddenVec(v, w):
     #    OR a probability distribution over the rating
     # w is a list of matrices of size m x F x 5
     # ret should be a vector of size F
-    return None
+    m,F,K = w.shape
+    h = np.zeros(F)
+    for h_j in range(F):
+        score = np.sum(v*w[:,h_j,:])
+        prob = sig(score)
+        h[h_j] = prob
+    return h
 
 def hiddenToVisible(h, w):
     ### TO IMPLEMENT ###
@@ -55,7 +61,13 @@ def hiddenToVisible(h, w):
     #   has not rated! (where reconstructing means getting a distribution
     #   over possible ratings).
     #   We only do so when we predict the rating a user would have given to a movie.
-    return None
+    m,F,K = w.shape
+    v = np.zeros((m,5))
+    for movie in range(m):
+        score = np.matmul(h,w[movie,:,:]) # 1 x F * F x 5
+        prob = softmax(score)
+        v[movie,] = prob
+    return v
 
 def probProduct(v, p):
     # v is a matrix of size m x 5
