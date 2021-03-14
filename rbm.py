@@ -49,7 +49,7 @@ def visibleToHiddenVec(v, w):
         score = np.sum(v*w[:,h_j,:])
         prob = sig(score)
         h[h_j] = prob
-    return h
+    return h  
 
 def hiddenToVisible(h, w):
     ### TO IMPLEMENT ###
@@ -103,7 +103,11 @@ def getPredictedDistribution(v, w, wq):
     #   - Backpropagate these hidden states to obtain
     #       the distribution over the movie whose associated weights are wq
     # ret is a vector of size 5
-    return None
+    posHiddenProb = visibleToHiddenVec(v, w)
+    sampledHidden = sample(posHiddenProb)
+    wq = wq.reshape((1, wq.shape[0], wq.shape[1]))
+    negData = hiddenToVisible(sampledHidden, wq)
+    return negData
 
 def predictRatingMax(ratingDistribution):
     ### TO IMPLEMENT ###
@@ -112,8 +116,8 @@ def predictRatingMax(ratingDistribution):
     # This function is one of three you are to implement
     # that returns a rating from the distribution
     # We decide here that the predicted rating will be the one with the highest probability
-    return None
-
+    prediction = np.where(ratingDistribution == np.amax(ratingDistribution))[0][0] + 1
+    return prediction
 
 def predictRatingExp(ratingDistribution):
     ### TO IMPLEMENT ###
@@ -123,7 +127,9 @@ def predictRatingExp(ratingDistribution):
     # that returns a rating from the distribution
     # We decide here that the predicted rating will be the expectation over
     # the softmax applied to ratingDistribution
-    return None
+    ratings = np.array((1,2,3,4,5))
+    prediction = np.dot(ratingDistribution,ratings)
+    return prediction
 
 def predictMovieForUser(q, user, W, training, predictType="exp"):
     # movie is movie idx
@@ -142,7 +148,10 @@ def predict(movies, users, W, training, predictType="exp"):
     # used to compute RMSE
     return [predictMovieForUser(movie, user, W, training, predictType=predictType) for (movie, user) in zip(movies, users)]
 
+training = lib.getTrainingData()
+trStats = lib.getUsefulStats(training)
+
 def predictForUser(user, W, training, predictType="exp"):
     ### TO IMPLEMENT
     # given a user ID, predicts all movie ratings for the user
-    return None
+    return [predictMovieForUser(movie, user, W, training, predictType=predictType) for movie in trStats["u_movies"]]
