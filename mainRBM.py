@@ -1,6 +1,7 @@
 import numpy as np
 import rbm
 import projectLib as lib
+import matplotlib.pyplot as plt
 
 training = lib.getTrainingData()
 validation = lib.getValidationData()
@@ -24,6 +25,9 @@ grad = np.zeros(W.shape)
 posprods = np.zeros(W.shape)
 negprods = np.zeros(W.shape)
 
+# create arrays to store our loss for each epoch
+train_loss = []
+val_loss = []
 
 for epoch in range(1, epochs):
     # in each epoch, we'll visit all users in a random order
@@ -68,14 +72,27 @@ for epoch in range(1, epochs):
     # We predict over the training set
     tr_r_hat = rbm.predict(trStats["movies"], trStats["users"], W, training)
     trRMSE = lib.rmse(trStats["ratings"], tr_r_hat)
+    train_loss.append(trRMSE)
 
     # We predict over the validation set
     vl_r_hat = rbm.predict(vlStats["movies"], vlStats["users"], W, training)
     vlRMSE = lib.rmse(vlStats["ratings"], vl_r_hat)
+    val_loss.append(vlRMSE)
 
     print("### EPOCH %d ###" % epoch)
     print("Training loss = %f" % trRMSE)
     print("Validation loss = %f" % vlRMSE)
+
+# plot the evolution of training and validation RMSE
+plt.figure(figsize=(8, 8))
+plt.plot(train_loss, label='Training Loss')
+plt.plot(val_loss, label='Validation Loss')
+plt.legend(loc='upper right')
+plt.ylabel('RMSE')
+plt.ylim([0,2.0])
+plt.title('Training and Validation Loss')
+plt.xlabel('epoch')
+plt.show()
 
 ### END ###
 # This part you can write on your own
