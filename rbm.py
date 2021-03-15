@@ -103,11 +103,20 @@ def getPredictedDistribution(v, w, wq):
     #   - Backpropagate these hidden states to obtain
     #       the distribution over the movie whose associated weights are wq
     # ret is a vector of size 5
-    posHiddenProb = visibleToHiddenVec(v, w)
+    posHiddenProb = visibleToHiddenVec(v,w)
     sampledHidden = sample(posHiddenProb)
-    wq = wq.reshape((1, wq.shape[0], wq.shape[1]))
-    negData = hiddenToVisible(sampledHidden, wq)
-    return negData
+    # same logic as a single for loop in the hiddenToVisible function
+    v = np.zeros((1,5))
+    score = np.matmul(sampledHidden,wq)
+    prob = softmax(score)
+    v = prob
+    return v
+    # # zenn code
+    # posHiddenProb = visibleToHiddenVec(v, w)
+    # sampledHidden = sample(posHiddenProb)
+    # wq = wq.reshape((1, wq.shape[0], wq.shape[1]))
+    # negData = hiddenToVisible(sampledHidden, wq)
+    # return negData
 
 def predictRatingMax(ratingDistribution):
     ### TO IMPLEMENT ###
