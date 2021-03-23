@@ -15,9 +15,10 @@ K = 5
 
 # SET PARAMETERS HERE!!!
 # number of hidden units
-F = 5
-epochs = 20
+F = 6
+epochs = 30
 gradientLearningRate = 0.05
+momentum = 3
 
 # Initialise all our arrays
 W = rbm.getInitialWeights(trStats["n_movies"], F, K)
@@ -33,6 +34,7 @@ for epoch in range(1, epochs):
     # in each epoch, we'll visit all users in a random order
     visitingOrder = np.array(trStats["u_users"])
     np.random.shuffle(visitingOrder)
+    last_grad = grad
 
     for user in visitingOrder:
         # get the ratings of that user
@@ -65,7 +67,7 @@ for epoch in range(1, epochs):
         # we average over the number of users in the batch (if we use mini-batch)
         grad[ratingsForUser[:, 0], :, :] = gradientLearningRate * (posprods[ratingsForUser[:, 0], :, :] - negprods[ratingsForUser[:, 0], :, :])
 
-        W[ratingsForUser[:, 0], :, :] += grad[ratingsForUser[:, 0], :, :]
+        W[ratingsForUser[:, 0], :, :] += grad[ratingsForUser[:, 0], :, :] + momentum * last_grad[ratingsForUser[:, 0], :, :]
 
     # Print the current RMSE for training and validation sets
     # this allows you to control for overfitting e.g
