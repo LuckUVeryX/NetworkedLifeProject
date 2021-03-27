@@ -11,16 +11,22 @@ validation = lib.getValidationData()
 trStats = lib.getUsefulStats(training)
 vlStats = lib.getUsefulStats(validation)
 
+# look at the data statistics
+print("train stats users movies ratings: ", trStats['n_users'], trStats['n_movies'], trStats['n_ratings'])
+print("val stats: ", vlStats['n_users'], vlStats['n_movies'], vlStats['n_ratings'])
+
 K = 5
 
 # SET PARAMETERS HERE!!!
 # number of hidden units
-F = 10
-epochs = 10
+F = 30
+epochs = 30
 # * We are using adaptive learning rate instead of a fixed gradientLearningRate
 # //gradientLearningRate = 0.1
-# * Use this to select ideal learing rate at epoch 1
+# * Use this to select ideal learning rate at epoch 1
 initialLearningRate = 2
+# Set the regularization strength here
+regularization = 0.05
 
 # Initialise all our arrays
 W = rbm.getInitialWeights(trStats["n_movies"], F, K)
@@ -68,9 +74,11 @@ for epoch in range(1, epochs):
             negData, negHiddenProb)
 
         # we average over the number of users in the batch (if we use mini-batch)
+        # implement L2 regularization; reference: https://sudonull.com/post/128613-Regularization-in-a-restricted-Boltzmann-machine-experiment
         grad[ratingsForUser[:, 0], :, :] = rbm.getAdaptiveLearningRate(lr0=initialLearningRate, epoch=epoch) * \
             (posprods[ratingsForUser[:, 0], :, :] -
-             negprods[ratingsForUser[:, 0], :, :])
+             negprods[ratingsForUser[:, 0], :, :] -
+             regularization * W[ratingsForUser[:, 0], :, :])
 
         W[ratingsForUser[:, 0], :, :] += grad[ratingsForUser[:, 0], :, :]
 
