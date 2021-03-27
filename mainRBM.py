@@ -17,7 +17,10 @@ K = 5
 # number of hidden units
 F = 10
 epochs = 10
-gradientLearningRate = 0.1
+# * We are using adaptive learning rate instead of a fixed gradientLearningRate
+# //gradientLearningRate = 0.1
+# * Use this to select ideal learing rate at epoch 1
+initialLearningRate = 2
 
 # Initialise all our arrays
 W = rbm.getInitialWeights(trStats["n_movies"], F, K)
@@ -49,7 +52,8 @@ for epoch in range(1, epochs):
         posHiddenProb = rbm.visibleToHiddenVec(v, weightsForUser)
         # get positive gradient
         # note that we only update the movies that this user has seen!
-        posprods[ratingsForUser[:, 0], :, :] = rbm.probProduct(v, posHiddenProb)
+        posprods[ratingsForUser[:, 0], :,
+                 :] = rbm.probProduct(v, posHiddenProb)
 
         ### UNLEARNING ###
         # sample from hidden distribution
@@ -60,10 +64,13 @@ for epoch in range(1, epochs):
         negHiddenProb = rbm.visibleToHiddenVec(negData, weightsForUser)
         # get negative gradient
         # note that we only update the movies that this user has seen!
-        negprods[ratingsForUser[:, 0], :, :] = rbm.probProduct(negData, negHiddenProb)
+        negprods[ratingsForUser[:, 0], :, :] = rbm.probProduct(
+            negData, negHiddenProb)
 
         # we average over the number of users in the batch (if we use mini-batch)
-        grad[ratingsForUser[:, 0], :, :] = gradientLearningRate * (posprods[ratingsForUser[:, 0], :, :] - negprods[ratingsForUser[:, 0], :, :])
+        grad[ratingsForUser[:, 0], :, :] = rbm.getAdaptiveLearningRate(lr0=initialLearningRate, epoch=epoch) * \
+            (posprods[ratingsForUser[:, 0], :, :] -
+             negprods[ratingsForUser[:, 0], :, :])
 
         W[ratingsForUser[:, 0], :, :] += grad[ratingsForUser[:, 0], :, :]
 
@@ -83,13 +90,17 @@ for epoch in range(1, epochs):
     print("Training loss = %f" % trRMSE)
     print("Validation loss = %f" % vlRMSE)
 
+    # ! Print statement to track learning rate. Comment out for submission
+    print("Learning Rate = %f" % rbm.getAdaptiveLearningRate(
+        lr0=initialLearningRate, epoch=epoch))
+
 # plot the evolution of training and validation RMSE
 plt.figure(figsize=(8, 8))
 plt.plot(train_loss, label='Training Loss')
 plt.plot(val_loss, label='Validation Loss')
 plt.legend(loc='upper right')
 plt.ylabel('RMSE')
-plt.ylim([0,2.0])
+plt.ylim([0, 2.0])
 plt.title('Training and Validation Loss')
 plt.xlabel('epoch')
 plt.show()

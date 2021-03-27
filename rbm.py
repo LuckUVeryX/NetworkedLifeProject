@@ -4,15 +4,18 @@ import projectLib as lib
 # set highest rating
 K = 5
 
+
 def softmax(x):
     # Numerically stable softmax function
     e_x = np.exp(x - np.max(x))
     return e_x / e_x.sum()
 
+
 def ratingsPerMovie(training):
     movies = [x[0] for x in training]
     u_movies = np.unique(movies).tolist()
     return np.array([[i, movie, len([x for x in training if x[0] == movie])] for i, movie in enumerate(u_movies)])
+
 
 def getV(ratingsForUser):
     # ratingsForUser is obtained from the ratings for user library
@@ -25,11 +28,13 @@ def getV(ratingsForUser):
         ret[i, ratingsForUser[i, 1]-1] = 1.0
     return ret
 
+
 def getInitialWeights(m, F, K):
     # m is the number of visible units
     # F is the number of hidden units
     # K is the highest rating (fixed to 5 here)
     return np.random.normal(0, 0.1, (m, F, K))
+
 
 def sig(x):
     ### TO IMPLEMENT ###
@@ -37,19 +42,21 @@ def sig(x):
     # ret should be a vector of size n where ret_i = sigmoid(x_i)
     return 1 / (1 + np.exp(-x))
 
+
 def visibleToHiddenVec(v, w):
     ### TO IMPLEMENT ###
     # v is a matrix of size m x 5. Each row is a binary vector representing a rating
     #    OR a probability distribution over the rating
     # w is a list of matrices of size m x F x 5
     # ret should be a vector of size F
-    m,F,K = w.shape
+    m, F, K = w.shape
     h = np.zeros(F)
     for h_j in range(F):
-        score = np.sum(v*w[:,h_j,:])
+        score = np.sum(v*w[:, h_j, :])
         prob = sig(score)
         h[h_j] = prob
-    return h  
+    return h
+
 
 def hiddenToVisible(h, w):
     ### TO IMPLEMENT ###
@@ -61,13 +68,14 @@ def hiddenToVisible(h, w):
     #   has not rated! (where reconstructing means getting a distribution
     #   over possible ratings).
     #   We only do so when we predict the rating a user would have given to a movie.
-    m,F,K = w.shape
-    v = np.zeros((m,5))
+    m, F, K = w.shape
+    v = np.zeros((m, 5))
     for movie in range(m):
-        score = np.matmul(h,w[movie,:,:]) # 1 x F * F x 5
+        score = np.matmul(h, w[movie, :, :])  # 1 x F * F x 5
         prob = softmax(score)
-        v[movie,] = prob
+        v[movie, ] = prob
     return v
+
 
 def probProduct(v, p):
     # v is a matrix of size m x 5
@@ -80,6 +88,7 @@ def probProduct(v, p):
                 ret[i, j, k] = v[i, k] * p[j]
     return ret
 
+
 def sample(p):
     # p is a vector of real numbers between 0 and 1
     # ret is a vector of same size as p, where ret_i = Ber(p_i)
@@ -87,6 +96,7 @@ def sample(p):
     # parameter p_i to obtain ret_i
     samples = np.random.random(p.size)
     return np.array(samples <= p, dtype=int)
+
 
 def getPredictedDistribution(v, w, wq):
     ### TO IMPLEMENT ###
@@ -103,11 +113,11 @@ def getPredictedDistribution(v, w, wq):
     #   - Backpropagate these hidden states to obtain
     #       the distribution over the movie whose associated weights are wq
     # ret is a vector of size 5
-    posHiddenProb = visibleToHiddenVec(v,w)
+    posHiddenProb = visibleToHiddenVec(v, w)
     sampledHidden = sample(posHiddenProb)
     # same logic as a single for loop in the hiddenToVisible function
-    v = np.zeros((1,5))
-    score = np.matmul(sampledHidden,wq)
+    v = np.zeros((1, 5))
+    score = np.matmul(sampledHidden, wq)
     prob = softmax(score)
     v = prob
     return v
@@ -118,6 +128,7 @@ def getPredictedDistribution(v, w, wq):
     # negData = hiddenToVisible(sampledHidden, wq)
     # return negData
 
+
 def predictRatingMax(ratingDistribution):
     ### TO IMPLEMENT ###
     # ratingDistribution is a probability distribution over possible ratings
@@ -125,8 +136,10 @@ def predictRatingMax(ratingDistribution):
     # This function is one of three you are to implement
     # that returns a rating from the distribution
     # We decide here that the predicted rating will be the one with the highest probability
-    prediction = np.where(ratingDistribution == np.amax(ratingDistribution))[0][0] + 1
+    prediction = np.where(ratingDistribution ==
+                          np.amax(ratingDistribution))[0][0] + 1
     return prediction
+
 
 def predictRatingExp(ratingDistribution):
     ### TO IMPLEMENT ###
@@ -136,9 +149,10 @@ def predictRatingExp(ratingDistribution):
     # that returns a rating from the distribution
     # We decide here that the predicted rating will be the expectation over
     # the softmax applied to ratingDistribution
-    ratings = np.array((1,2,3,4,5))
-    prediction = np.dot(ratingDistribution,ratings)
+    ratings = np.array((1, 2, 3, 4, 5))
+    prediction = np.dot(ratingDistribution, ratings)
     return prediction
+
 
 def predictMovieForUser(q, user, W, training, predictType="exp"):
     # movie is movie idx
@@ -146,21 +160,34 @@ def predictMovieForUser(q, user, W, training, predictType="exp"):
     # type can be "max" or "exp"
     ratingsForUser = lib.getRatingsForUser(user, training)
     v = getV(ratingsForUser)
-    ratingDistribution = getPredictedDistribution(v, W[ratingsForUser[:, 0], :, :], W[q, :, :])
+    ratingDistribution = getPredictedDistribution(
+        v, W[ratingsForUser[:, 0], :, :], W[q, :, :])
     if predictType == "max":
         return predictRatingMax(ratingDistribution)
     else:
         return predictRatingExp(ratingDistribution)
+
 
 def predict(movies, users, W, training, predictType="exp"):
     # given a list of movies and users, predict the rating for each (movie, user) pair
     # used to compute RMSE
     return [predictMovieForUser(movie, user, W, training, predictType=predictType) for (movie, user) in zip(movies, users)]
 
+
 training = lib.getTrainingData()
 trStats = lib.getUsefulStats(training)
 
+
 def predictForUser(user, W, training, predictType="exp"):
-    ### TO IMPLEMENT
+    # TO IMPLEMENT
     # given a user ID, predicts all movie ratings for the user
     return [predictMovieForUser(movie, user, W, training, predictType=predictType) for movie in trStats["u_movies"]]
+
+
+def getAdaptiveLearningRate(lr0, epoch):
+    # * Using Time-based decay
+    # ? Perhaps explore different type of adaptive learning rates
+    # https://towardsdatascience.com/learning-rate-schedules-and-adaptive-learning-rate-methods-for-deep-learning-2c8f433990d1
+    # TODO tune hyper paramter k
+    k = 4  # * k is a hyper parameter
+    return lr0/(1+k*epoch)
