@@ -11,6 +11,7 @@ validation = lib.getValidationData()
 trStats = lib.getUsefulStats(training)
 vlStats = lib.getUsefulStats(validation)
 
+# look at the data statistics
 print("train stats users movies ratings: ", trStats['n_users'], trStats['n_movies'], trStats['n_ratings'])
 print("val stats: ", vlStats['n_users'], vlStats['n_movies'], vlStats['n_ratings'])
 
@@ -21,6 +22,7 @@ K = 5
 F = 50
 epochs = 30
 gradientLearningRate = 0.1
+regularization = 0.05
 
 # Initialise all our arrays
 W = rbm.getInitialWeights(trStats["n_movies"], F, K)
@@ -67,9 +69,9 @@ for epoch in range(1, epochs):
 
         # we average over the number of users in the batch (if we use mini-batch)
         # implement L2 regularization; reference: https://sudonull.com/post/128613-Regularization-in-a-restricted-Boltzmann-machine-experiment
-        l = 0.05    # lambda
-        grad[ratingsForUser[:, 0], :, :] = gradientLearningRate * (posprods[ratingsForUser[:, 0], :, :] - negprods[ratingsForUser[:, 0], :, :] - l*W[ratingsForUser[:, 0], :, :])
-
+        grad[ratingsForUser[:, 0], :, :] = gradientLearningRate * (posprods[ratingsForUser[:, 0], :, :] - negprods[ratingsForUser[:, 0], :, :] - regularization*W[ratingsForUser[:, 0], :, :])
+        
+        # this is the original gradient update, left here for reference
         # grad[ratingsForUser[:, 0], :, :] = gradientLearningRate * (posprods[ratingsForUser[:, 0], :, :] - negprods[ratingsForUser[:, 0], :, :])
         W[ratingsForUser[:, 0], :, :] += grad[ratingsForUser[:, 0], :, :]
 
