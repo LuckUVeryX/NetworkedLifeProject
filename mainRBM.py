@@ -28,10 +28,10 @@ epochs = 30
 # * We are using adaptive learning rate instead of a fixed gradientLearningRate
 # //gradientLearningRate = 0.1
 # * Use this to select ideal learning rate at epoch 1
-initialLearningRate = 2
+initialLearningRate = 10
 
 # * Set the regularization strength here
-regularization = 0.05
+regularization = 0.01
 
 # * Momemntum
 momentum = 3
