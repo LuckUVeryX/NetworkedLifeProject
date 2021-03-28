@@ -12,20 +12,23 @@ trStats = lib.getUsefulStats(training)
 vlStats = lib.getUsefulStats(validation)
 
 # look at the data statistics
-print("train stats users movies ratings: ", trStats['n_users'], trStats['n_movies'], trStats['n_ratings'])
-print("val stats: ", vlStats['n_users'], vlStats['n_movies'], vlStats['n_ratings'])
+print("train stats users movies ratings: ",
+      trStats['n_users'], trStats['n_movies'], trStats['n_ratings'])
+print("val stats: ", vlStats['n_users'],
+      vlStats['n_movies'], vlStats['n_ratings'])
 
 K = 5
 
 # SET PARAMETERS HERE!!!
 # number of hidden units
+# TODO Hyper parameter tuning F, (number of hidden units)
 F = 30
 epochs = 30
 # * We are using adaptive learning rate instead of a fixed gradientLearningRate
 # //gradientLearningRate = 0.1
 # * Use this to select ideal learning rate at epoch 1
 initialLearningRate = 2
-# Set the regularization strength here
+# * Set the regularization strength here
 regularization = 0.05
 
 # Initialise all our arrays
