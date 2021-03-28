@@ -30,6 +30,9 @@ epochs = 30
 # //gradientLearningRate = 0.1
 # * Use this to select ideal learning rate at epoch 1
 initialLearningRate = 1
+#  TODO Hyper parameter tuning
+# ? Range from 1 to 5
+learningRateDecay = 4
 
 # * Set the regularization strength here
 # TODO Hyper parameter tuning
@@ -125,7 +128,7 @@ for epoch in range(1, epochs):
 
     # ! Print statement to track learning rate. Comment out for submission
     print("Learning Rate = %f" % rbm.getAdaptiveLearningRate(
-        lr0=initialLearningRate, epoch=epoch))
+        lr0=initialLearningRate, epoch=epoch, k=learningRateDecay))
 
 # plot the evolution of training and validation RMSE
 plt.figure(figsize=(8, 8))
