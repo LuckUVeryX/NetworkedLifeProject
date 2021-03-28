@@ -21,19 +21,24 @@ K = 5
 
 # SET PARAMETERS HERE!!!
 # number of hidden units
-# TODO Hyper parameter tuning F, (number of hidden units)
-F = 30
+# TODO Hyper parameter tuning F
+# ? Range from 8 to 50
+F = 5
 epochs = 30
 
 # * We are using adaptive learning rate instead of a fixed gradientLearningRate
 # //gradientLearningRate = 0.1
 # * Use this to select ideal learning rate at epoch 1
-initialLearningRate = 10
+initialLearningRate = 1
 
 # * Set the regularization strength here
-regularization = 0.01
+# TODO Hyper parameter tuning
+# ? Range from 0 to 0.05
+regularization = 0.001
 
 # * Momemntum
+# TODO Hyper parameter tuning
+# ? 0 to 1
 momentum = 3
 
 # Initialise all our arrays
@@ -137,6 +142,6 @@ plt.show()
 # This part you can write on your own
 # you could plot the evolution of the training and validation RMSEs for example
 
-predictedRatings = np.array(
-    [rbm.predictForUser(user, bestWeights, training) for user in trStats["u_users"]])
-np.savetxt("predictions/predictedRatings.txt", predictedRatings)
+# predictedRatings = np.array(
+#     [rbm.predictForUser(user, bestWeights, training) for user in trStats["u_users"]])
+# np.savetxt("predictions/predictedRatings.txt", predictedRatings)

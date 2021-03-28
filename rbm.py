@@ -188,6 +188,7 @@ def getAdaptiveLearningRate(lr0, epoch):
     # * Using Time-based decay
     # ? Perhaps explore different type of adaptive learning rates
     # https://towardsdatascience.com/learning-rate-schedules-and-adaptive-learning-rate-methods-for-deep-learning-2c8f433990d1
-    # TODO tune hyper parameter k
+    #  TODO Hyper parameter tuning
+    # ? Range from 1 to 5
     k = 4  # * k is a hyper parameter
     return lr0/(1+k*(epoch-1))
