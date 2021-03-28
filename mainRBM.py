@@ -28,12 +28,19 @@ epochs = 100
 # * We are using adaptive learning rate instead of a fixed gradientLearningRate
 # //gradientLearningRate = 0.1
 # * Use this to select ideal learning rate at epoch 1
-initialLearningRate = 4
+initialLearningRate = 0.8
+#  TODO Hyper parameter tuning
+# ? Range from 1 to 5
+learningRateDecay = 5
 
 # * Set the regularization strength here
+# TODO Hyper parameter tuning
+# ? Range from 0 to 0.05
 regularization = 0.05
 
 # * Momemntum
+# TODO Hyper parameter tuning
+# ? 0 to 1
 momentum = 0.8
 
 # Initialise all our arrays
@@ -89,7 +96,7 @@ for epoch in range(1, epochs):
 
         # we average over the number of users in the batch (if we use mini-batch)
         # implement L2 regularization; reference: https://sudonull.com/post/128613-Regularization-in-a-restricted-Boltzmann-machine-experiment
-        grad[ratingsForUser[:, 0], :, :] = rbm.getAdaptiveLearningRate(lr0=initialLearningRate, epoch=epoch) * \
+        grad[ratingsForUser[:, 0], :, :] = rbm.getAdaptiveLearningRate(lr0=initialLearningRate, epoch=epoch, k=learningRateDecay) * \
             (posprods[ratingsForUser[:, 0], :, :] -
              negprods[ratingsForUser[:, 0], :, :] -
              regularization * W[ratingsForUser[:, 0], :, :])
@@ -120,7 +127,7 @@ for epoch in range(1, epochs):
 
     # ! Print statement to track learning rate. Comment out for submission
     print("Learning Rate = %f" % rbm.getAdaptiveLearningRate(
-        lr0=initialLearningRate, epoch=epoch))
+        lr0=initialLearningRate, epoch=epoch, k=learningRateDecay))
 
 # plot the evolution of training and validation RMSE
 plt.figure(figsize=(8, 8))
@@ -137,6 +144,6 @@ plt.show()
 # This part you can write on your own
 # you could plot the evolution of the training and validation RMSEs for example
 
-predictedRatings = np.array(
-    [rbm.predictForUser(user, bestWeights, training) for user in trStats["u_users"]])
-np.savetxt("predictedRatings.txt", predictedRatings)
+# predictedRatings = np.array(
+#     [rbm.predictForUser(user, bestWeights, training) for user in trStats["u_users"]])
+# np.savetxt("predictions/predictedRatings.txt", predictedRatings)
