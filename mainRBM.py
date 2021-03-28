@@ -139,4 +139,4 @@ plt.show()
 
 predictedRatings = np.array(
     [rbm.predictForUser(user, bestWeights, training) for user in trStats["u_users"]])
-np.savetxt("predictedRatings.txt", predictedRatings)
+np.savetxt("predictions/predictedRatings.txt", predictedRatings)
