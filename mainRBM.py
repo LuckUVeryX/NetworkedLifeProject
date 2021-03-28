@@ -50,6 +50,8 @@ for epoch in range(1, epochs):
     # in each epoch, we'll visit all users in a random order
     visitingOrder = np.array(trStats["u_users"])
     np.random.shuffle(visitingOrder)
+
+    # keep track previous gradient
     last_grad = grad
 
     for user in visitingOrder:
@@ -89,6 +91,7 @@ for epoch in range(1, epochs):
              negprods[ratingsForUser[:, 0], :, :] -
              regularization * W[ratingsForUser[:, 0], :, :])
 
+        # give some inertia to the gradient updates, limiting the risk that your gradient starts oscillating
         W[ratingsForUser[:, 0], :, :] += grad[ratingsForUser[:, 0], :, :] + \
             momentum * last_grad[ratingsForUser[:, 0], :, :]
 
