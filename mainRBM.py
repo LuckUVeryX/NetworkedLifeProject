@@ -24,12 +24,17 @@ K = 5
 # TODO Hyper parameter tuning F, (number of hidden units)
 F = 30
 epochs = 30
+
 # * We are using adaptive learning rate instead of a fixed gradientLearningRate
 # //gradientLearningRate = 0.1
 # * Use this to select ideal learning rate at epoch 1
 initialLearningRate = 2
+
 # * Set the regularization strength here
 regularization = 0.05
+
+# * Momemntum
+momentum = 3
 
 # Initialise all our arrays
 W = rbm.getInitialWeights(trStats["n_movies"], F, K)
@@ -45,6 +50,7 @@ for epoch in range(1, epochs):
     # in each epoch, we'll visit all users in a random order
     visitingOrder = np.array(trStats["u_users"])
     np.random.shuffle(visitingOrder)
+    last_grad = grad
 
     for user in visitingOrder:
         # get the ratings of that user
@@ -83,7 +89,8 @@ for epoch in range(1, epochs):
              negprods[ratingsForUser[:, 0], :, :] -
              regularization * W[ratingsForUser[:, 0], :, :])
 
-        W[ratingsForUser[:, 0], :, :] += grad[ratingsForUser[:, 0], :, :]
+        W[ratingsForUser[:, 0], :, :] += grad[ratingsForUser[:, 0], :, :] + \
+            momentum * last_grad[ratingsForUser[:, 0], :, :]
 
     # Print the current RMSE for training and validation sets
     # this allows you to control for overfitting e.g
