@@ -97,7 +97,7 @@ for epoch in range(1, epochs):
 
         # we average over the number of users in the batch (if we use mini-batch)
         # implement L2 regularization; reference: https://sudonull.com/post/128613-Regularization-in-a-restricted-Boltzmann-machine-experiment
-        grad[ratingsForUser[:, 0], :, :] = rbm.getAdaptiveLearningRate(lr0=initialLearningRate, epoch=epoch) * \
+        grad[ratingsForUser[:, 0], :, :] = rbm.getAdaptiveLearningRate(lr0=initialLearningRate, epoch=epoch, k=learningRateDecay) * \
             (posprods[ratingsForUser[:, 0], :, :] -
              negprods[ratingsForUser[:, 0], :, :] -
              regularization * W[ratingsForUser[:, 0], :, :])
