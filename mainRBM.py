@@ -46,6 +46,9 @@ negprods = np.zeros(W.shape)
 train_loss = []
 val_loss = []
 
+# store best weights
+bestWeights = W
+
 for epoch in range(1, epochs):
     # in each epoch, we'll visit all users in a random order
     visitingOrder = np.array(trStats["u_users"])
@@ -107,6 +110,10 @@ for epoch in range(1, epochs):
     vlRMSE = lib.rmse(vlStats["ratings"], vl_r_hat)
     val_loss.append(vlRMSE)
 
+    # If Val loss is lower than what we have seen so far, update the best weights
+    if val_loss[-1] <= min(val_loss):
+        bestWeights = W
+
     print("### EPOCH %d ###" % epoch)
     print("Training loss = %f" % trRMSE)
     print("Validation loss = %f" % vlRMSE)
@@ -130,5 +137,6 @@ plt.show()
 # This part you can write on your own
 # you could plot the evolution of the training and validation RMSEs for example
 
-# predictedRatings = np.array([rbm.predictForUser(user, W, training) for user in trStats["u_users"]])
-# np.savetxt("predictedRatings.txt", predictedRatings)
+predictedRatings = np.array(
+    [rbm.predictForUser(user, bestWeights, training) for user in trStats["u_users"]])
+np.savetxt("predictedRatings.txt", predictedRatings)
