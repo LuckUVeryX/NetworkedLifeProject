@@ -22,19 +22,19 @@ K = 5
 # SET PARAMETERS HERE!!!
 # number of hidden units
 # TODO Hyper parameter tuning F, (number of hidden units)
-F = 30
-epochs = 30
+F = 15
+epochs = 100
 
 # * We are using adaptive learning rate instead of a fixed gradientLearningRate
 # //gradientLearningRate = 0.1
 # * Use this to select ideal learning rate at epoch 1
-initialLearningRate = 2
+initialLearningRate = 4
 
 # * Set the regularization strength here
 regularization = 0.05
 
 # * Momemntum
-momentum = 3
+momentum = 0.8
 
 # Initialise all our arrays
 W = rbm.getInitialWeights(trStats["n_movies"], F, K)
@@ -95,7 +95,7 @@ for epoch in range(1, epochs):
              regularization * W[ratingsForUser[:, 0], :, :])
 
         # give some inertia to the gradient updates, limiting the risk that your gradient starts oscillating
-        W[ratingsForUser[:, 0], :, :] += grad[ratingsForUser[:, 0], :, :] + \
+        W[ratingsForUser[:, 0], :, :] += (1-momentum) * grad[ratingsForUser[:, 0], :, :] + \
             momentum * last_grad[ratingsForUser[:, 0], :, :]
 
     # Print the current RMSE for training and validation sets
