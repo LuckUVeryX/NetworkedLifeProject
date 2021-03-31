@@ -23,15 +23,15 @@ K = 5
 # number of hidden units
 # TODO Hyper parameter tuning F, (number of hidden units)
 F = 15
-epochs = 100
+epochs = 50
 
 # * We are using adaptive learning rate instead of a fixed gradientLearningRate
 # //gradientLearningRate = 0.1
 # * Use this to select ideal learning rate at epoch 1
-initialLearningRate = 0.8
+initialLearningRate = 3.0
 #  TODO Hyper parameter tuning
 # ? Range from 1 to 5
-learningRateDecay = 5
+learningRateDecay = 4
 
 # * Set the regularization strength here
 # TODO Hyper parameter tuning
@@ -41,7 +41,7 @@ regularization = 0.05
 # * Momemntum
 # TODO Hyper parameter tuning
 # ? 0 to 1
-momentum = 0.8
+momentum = 0.3
 
 # Initialise all our arrays
 W = rbm.getInitialWeights(trStats["n_movies"], F, K)
@@ -128,6 +128,7 @@ for epoch in range(1, epochs):
     # ! Print statement to track learning rate. Comment out for submission
     print("Learning Rate = %f" % rbm.getAdaptiveLearningRate(
         lr0=initialLearningRate, epoch=epoch, k=learningRateDecay))
+    print("")
 
 # plot the evolution of training and validation RMSE
 plt.figure(figsize=(8, 8))
@@ -144,6 +145,6 @@ plt.show()
 # This part you can write on your own
 # you could plot the evolution of the training and validation RMSEs for example
 
-# predictedRatings = np.array(
+#predictedRatings = np.array(
 #     [rbm.predictForUser(user, bestWeights, training) for user in trStats["u_users"]])
-# np.savetxt("predictions/predictedRatings.txt", predictedRatings)
+#np.savetxt("predictions/predictedRatings.txt", predictedRatings)
