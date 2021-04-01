@@ -35,9 +35,11 @@ def getInitialWeights(m, F, K):
     # K is the highest rating (fixed to 5 here)
     return np.random.normal(0, 0.1, (m, F, K))
 
+
 def getInitialHiddenBias(F):
     # F is the number of hidden units
     return np.random.normal(0, 0.1, (F))
+
 
 def getInitialVisibleBias(m, K):
     # m is the number of visible units
@@ -65,6 +67,7 @@ def visibleToHiddenVec(v, w):
         prob = sig(score)
         h[h_j] = prob
     return h
+
 
 def visibleToHiddenVecBias(v, w, b):
     ### TO IMPLEMENT ###
@@ -99,6 +102,7 @@ def hiddenToVisible(h, w):
         prob = softmax(score)
         v[movie, ] = prob
     return v
+
 
 def hiddenToVisibleBias(h, w, b):
     ### TO IMPLEMENT ###
@@ -166,6 +170,7 @@ def getPredictedDistribution(v, w, wq):
     v = prob
     return v
 
+
 def getPredictedDistributionWithBias(v, w, wq, hidden_bias, visible_bias, vbq):
     ### TO IMPLEMENT ###
     # This function returns a distribution over the ratings for movie q, if user data is v
@@ -232,6 +237,7 @@ def predictMovieForUser(q, user, W, training, predictType="exp"):
     else:
         return predictRatingExp(ratingDistribution)
 
+
 def predictMovieForUserWithBias(q, user, W, hidden_bias, visible_bias, training, predictType="exp"):
     # movie is movie idx
     # user is user ID
@@ -251,18 +257,22 @@ def predict(movies, users, W, training, predictType="exp"):
     # used to compute RMSE
     return [predictMovieForUser(movie, user, W, training, predictType=predictType) for (movie, user) in zip(movies, users)]
 
+
 def predictWithBias(movies, users, W, hidden_bias, visible_bias,training, predictType="exp"):
     # given a list of movies and users, predict the rating for each (movie, user) pair
     # used to compute RMSE
     return [predictMovieForUserWithBias(movie, user, W, hidden_bias,visible_bias, training, predictType=predictType) for (movie, user) in zip(movies, users)]
 
+
 training = lib.getTrainingData()
 trStats = lib.getUsefulStats(training)
+
 
 def predictForUser(user, W, training, predictType="exp"):
     # TO IMPLEMENT
     # given a user ID, predicts all movie ratings for the user
     return [predictMovieForUser(movie, user, W, training, predictType=predictType) for movie in trStats["u_movies"]]
+
 
 def predictForUserWithBias(user, W, hidden_bias, visible_bias, training, predictType="exp"):
     # TO IMPLEMENT
