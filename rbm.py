@@ -35,6 +35,15 @@ def getInitialWeights(m, F, K):
     # K is the highest rating (fixed to 5 here)
     return np.random.normal(0, 0.1, (m, F, K))
 
+def getInitialHiddenBias(F):
+    # F is the number of hidden units
+    return np.random.normal(0, 0.1, (F))
+
+def getInitialVisibleBias(m, K):
+    # m is the number of visible units
+    # K is the highest rating (fixed to 5 here)
+    return np.random.normal(0, 0.1, (m, K))
+
 
 def sig(x):
     ### TO IMPLEMENT ###
@@ -57,6 +66,21 @@ def visibleToHiddenVec(v, w):
         h[h_j] = prob
     return h
 
+def visibleToHiddenVecBias(v, w, b):
+    ### TO IMPLEMENT ###
+    # v is a matrix of size m x 5. Each row is a binary vector representing a rating
+    #    OR a probability distribution over the rating
+    # w is a list of matrices of size m x F x 5
+    # b is the hidden bias of size F
+    # ret should be a vector of size F
+    m, F, K = w.shape
+    h = np.zeros(F)
+    for h_j in range(F):
+        score = np.sum(v*w[:, h_j, :]) + b[h_j]
+        prob = sig(score)
+        h[h_j] = prob
+    return h
+
 
 def hiddenToVisible(h, w):
     ### TO IMPLEMENT ###
@@ -72,6 +96,26 @@ def hiddenToVisible(h, w):
     v = np.zeros((m, 5))
     for movie in range(m):
         score = np.matmul(h, w[movie, :, :])  # 1 x F * F x 5
+        prob = softmax(score)
+        v[movie, ] = prob
+    return v
+
+def hiddenToVisibleBias(h, w, b):
+    ### TO IMPLEMENT ###
+    # h is a binary vector of size F
+    # w is an array of size m x F x 5
+    # b is visible bias of size m x 5
+    # ret should be a matrix of size m x 5, where m
+    #   is the number of movies the user has seen.
+    #   Remember that we do not reconstruct movies that the user
+    #   has not rated! (where reconstructing means getting a distribution
+    #   over possible ratings).
+    #   We only do so when we predict the rating a user would have given to a movie.
+    m, F, K = w.shape
+    v = np.zeros((m, 5))
+    for movie in range(m):
+        # (1 x F * F x 5) + (1 X 5) 
+        score = np.matmul(h, w[movie, :, :]) + b[movie,:]
         prob = softmax(score)
         v[movie, ] = prob
     return v
@@ -121,12 +165,33 @@ def getPredictedDistribution(v, w, wq):
     prob = softmax(score)
     v = prob
     return v
-    # # zenn code
-    # posHiddenProb = visibleToHiddenVec(v, w)
-    # sampledHidden = sample(posHiddenProb)
-    # wq = wq.reshape((1, wq.shape[0], wq.shape[1]))
-    # negData = hiddenToVisible(sampledHidden, wq)
-    # return negData
+
+def getPredictedDistributionWithBias(v, w, wq, hidden_bias, visible_bias, vbq):
+    ### TO IMPLEMENT ###
+    # This function returns a distribution over the ratings for movie q, if user data is v
+    # v is the dataset of the user we are predicting the movie for
+    #   It is a m x 5 matrix, where m is the number of movies in the
+    #   dataset of this user.
+    # w is the weights array for the current user, of size m x F x 5
+    # wq is the weight matrix of size F x 5 for movie q
+    #   If W is the whole weights array, then wq = W[q, :, :]
+    # visible_bias is the bias array for the current user, of size m x 5
+    # vbq is the bias matrix of size 1 x 5 for movie q
+    #   If visible_bias is the whole weights array, then vbq = visible_bias[q, :]
+    # You will need to perform the same steps done in the learning/unlearning:
+    #   - Propagate the user input to the hidden units
+    #   - Sample the state of the hidden units
+    #   - Backpropagate these hidden states to obtain
+    #       the distribution over the movie whose associated weights are wq
+    # ret is a vector of size 5
+    posHiddenProb = visibleToHiddenVecBias(v, w, hidden_bias)
+    sampledHidden = sample(posHiddenProb)
+    # same logic as a single for loop in the hiddenToVisibleBias function
+    v = np.zeros((1, 5))
+    score = np.matmul(sampledHidden, wq) + vbq
+    prob = softmax(score)
+    v = prob
+    return v
 
 
 def predictRatingMax(ratingDistribution):
@@ -167,21 +232,42 @@ def predictMovieForUser(q, user, W, training, predictType="exp"):
     else:
         return predictRatingExp(ratingDistribution)
 
+def predictMovieForUserWithBias(q, user, W, hidden_bias, visible_bias, training, predictType="exp"):
+    # movie is movie idx
+    # user is user ID
+    # type can be "max" or "exp"
+    ratingsForUser = lib.getRatingsForUser(user, training)
+    v = getV(ratingsForUser)
+    ratingDistribution = getPredictedDistributionWithBias(
+        v, W[ratingsForUser[:, 0], :, :], W[q, :, :], hidden_bias, visible_bias[ratingsForUser[:, 0], :],visible_bias[q, :, :])
+    if predictType == "max":
+        return predictRatingMax(ratingDistribution)
+    else:
+        return predictRatingExp(ratingDistribution)
+
 
 def predict(movies, users, W, training, predictType="exp"):
     # given a list of movies and users, predict the rating for each (movie, user) pair
     # used to compute RMSE
     return [predictMovieForUser(movie, user, W, training, predictType=predictType) for (movie, user) in zip(movies, users)]
 
+def predictWithBias(movies, users, W, hidden_bias, visible_bias,training, predictType="exp"):
+    # given a list of movies and users, predict the rating for each (movie, user) pair
+    # used to compute RMSE
+    return [predictMovieForUserWithBias(movie, user, W, hidden_bias,visible_bias, training, predictType=predictType) for (movie, user) in zip(movies, users)]
 
 training = lib.getTrainingData()
 trStats = lib.getUsefulStats(training)
-
 
 def predictForUser(user, W, training, predictType="exp"):
     # TO IMPLEMENT
     # given a user ID, predicts all movie ratings for the user
     return [predictMovieForUser(movie, user, W, training, predictType=predictType) for movie in trStats["u_movies"]]
+
+def predictForUserWithBias(user, W, hidden_bias, visible_bias, training, predictType="exp"):
+    # TO IMPLEMENT
+    # given a user ID, predicts all movie ratings for the user
+    return [predictMovieForUserWithBias(movie, user, W, hidden_bias, visible_bias, training, predictType=predictType) for movie in trStats["u_movies"]]
 
 
 def getAdaptiveLearningRate(lr0, epoch, k):

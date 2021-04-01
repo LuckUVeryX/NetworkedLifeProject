@@ -48,6 +48,14 @@ W = rbm.getInitialWeights(trStats["n_movies"], F, K)
 grad = np.zeros(W.shape)
 posprods = np.zeros(W.shape)
 negprods = np.zeros(W.shape)
+# imagine bias as additional hidden and visible unit
+# bias is a term to be added for each visible unit, for each hidden unit, and there are 5 ratings
+# Ref: Salakhutdinov et al. research paper
+hidden_bias = rbm.getInitialHiddenBias(F) # b_j is bias of hidden feature j
+hidden_bias_grad = np.zeros(hidden_bias.shape)
+
+visible_bias = rbm.getInitialVisibleBias(trStats["n_movies"], K) # b_ik is the bias of rating k for movie i
+visible_bias_grad = np.zeros(visible_bias.shape)
 
 # create arrays to store our loss for each epoch
 train_loss = []
@@ -55,14 +63,20 @@ val_loss = []
 
 # store best weights
 bestWeights = W
+# store best biases
+best_hidden_bias = hidden_bias
+best_visible_bias = visible_bias
 
 for epoch in range(1, epochs):
     # in each epoch, we'll visit all users in a random order
     visitingOrder = np.array(trStats["u_users"])
     np.random.shuffle(visitingOrder)
 
-    # keep track previous gradient
+    # keep track previous gradient for weights
     last_grad = grad
+    # keep track of previous gradient for biases
+    last_hidden_bias_grad = hidden_bias_grad
+    last_visible_bias_grad = visible_bias_grad
 
     for user in visitingOrder:
         # get the ratings of that user
@@ -73,10 +87,12 @@ for epoch in range(1, epochs):
 
         # get the weights associated to movies the user has seen
         weightsForUser = W[ratingsForUser[:, 0], :, :]
+        # get the visible bias associated to movies the user has seen
+        visible_biasForUser = visible_bias[ratingsForUser[:,0],:]
 
         ### LEARNING ###
         # propagate visible input to hidden units
-        posHiddenProb = rbm.visibleToHiddenVec(v, weightsForUser)
+        posHiddenProb = rbm.visibleToHiddenVecBias(v, weightsForUser, hidden_bias)
         # get positive gradient
         # note that we only update the movies that this user has seen!
         posprods[ratingsForUser[:, 0], :,
@@ -86,9 +102,9 @@ for epoch in range(1, epochs):
         # sample from hidden distribution
         sampledHidden = rbm.sample(posHiddenProb)
         # propagate back to get "negative data"
-        negData = rbm.hiddenToVisible(sampledHidden, weightsForUser)
+        negData = rbm.hiddenToVisibleBias(sampledHidden, weightsForUser, visible_biasForUser)
         # propagate negative data to hidden units
-        negHiddenProb = rbm.visibleToHiddenVec(negData, weightsForUser)
+        negHiddenProb = rbm.visibleToHiddenVecBias(negData, weightsForUser, hidden_bias)
         # get negative gradient
         # note that we only update the movies that this user has seen!
         negprods[ratingsForUser[:, 0], :, :] = rbm.probProduct(
@@ -105,21 +121,44 @@ for epoch in range(1, epochs):
         W[ratingsForUser[:, 0], :, :] += (1-momentum) * grad[ratingsForUser[:, 0], :, :] + \
             momentum * last_grad[ratingsForUser[:, 0], :, :]
 
+        # calculate the gradient wrt biases
+        # refer to update rule for biases: https://stats.stackexchange.com/questions/139138/updating-bias-with-rbms-restricted-boltzmann-machines
+        # gradient for hidden bias
+        hidden_bias_grad = rbm.getAdaptiveLearningRate(lr0=initialLearningRate, epoch=epoch, k=learningRateDecay) * \
+            (posHiddenProb - 
+             negHiddenProb - 
+             regularization * hidden_bias)
+        # give some inertia to gradient updates
+        hidden_bias += (1-momentum) * hidden_bias_grad + \
+            momentum * last_hidden_bias_grad
+        
+        # gradient for visible bias
+        visible_bias_grad[ratingsForUser[:,0],:] = rbm.getAdaptiveLearningRate(lr0=initialLearningRate, epoch=epoch, k=learningRateDecay) * \
+            (v - 
+             negData -
+             regularization * visible_bias[ratingsForUser[:,0],:])
+        # give some inertia to gradient updates
+        visible_bias[ratingsForUser[:,0],:] += (1-momentum) * visible_bias_grad[ratingsForUser[:,0],:] + \
+            momentum * last_visible_bias_grad[ratingsForUser[:,0],:]
+
+
     # Print the current RMSE for training and validation sets
     # this allows you to control for overfitting e.g
     # We predict over the training set
-    tr_r_hat = rbm.predict(trStats["movies"], trStats["users"], W, training)
+    tr_r_hat = rbm.predictWithBias(trStats["movies"], trStats["users"], W, hidden_bias, visible_bias, training)
     trRMSE = lib.rmse(trStats["ratings"], tr_r_hat)
     train_loss.append(trRMSE)
 
     # We predict over the validation set
-    vl_r_hat = rbm.predict(vlStats["movies"], vlStats["users"], W, training)
+    vl_r_hat = rbm.predictWithBias(vlStats["movies"], vlStats["users"], W, hidden_bias, visible_bias, training)
     vlRMSE = lib.rmse(vlStats["ratings"], vl_r_hat)
     val_loss.append(vlRMSE)
 
     # If Val loss is lower than what we have seen so far, update the best weights
     if val_loss[-1] <= min(val_loss):
         bestWeights = W
+        best_hidden_bias = hidden_bias
+        best_visible_bias = visible_bias
 
     print("### EPOCH %d ###" % epoch)
     print("Training loss = %f" % trRMSE)
@@ -146,5 +185,5 @@ plt.show()
 # you could plot the evolution of the training and validation RMSEs for example
 
 #predictedRatings = np.array(
-#     [rbm.predictForUser(user, bestWeights, training) for user in trStats["u_users"]])
+#     [rbm.predictForUserWithBias(user, bestWeights, best_hidden_bias, best_visible_bias, training) for user in trStats["u_users"]])
 #np.savetxt("predictions/predictedRatings.txt", predictedRatings)
