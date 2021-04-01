@@ -245,7 +245,7 @@ def predictMovieForUserWithBias(q, user, W, hidden_bias, visible_bias, training,
     ratingsForUser = lib.getRatingsForUser(user, training)
     v = getV(ratingsForUser)
     ratingDistribution = getPredictedDistributionWithBias(
-        v, W[ratingsForUser[:, 0], :, :], W[q, :, :], hidden_bias, visible_bias[ratingsForUser[:, 0], :],visible_bias[q, :, :])
+        v, W[ratingsForUser[:, 0], :, :], W[q, :, :], hidden_bias, visible_bias[ratingsForUser[:, 0], :],visible_bias[q, :])
     if predictType == "max":
         return predictRatingMax(ratingDistribution)
     else:
