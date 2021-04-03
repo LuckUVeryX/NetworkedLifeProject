@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import datetime
 import os.path
+import time
 
 training = lib.getTrainingData()
 validation = lib.getValidationData()
@@ -238,6 +239,9 @@ def rbm_model(_F,_initialLearningRate, _learningRateDecay, _regularization, _mom
 
 def finding_rbm_parameters(_F_list, _initialLearningRate_list, _learningRateDecay_list, 
                             _regularization_list, _momentum_list):
+    #measure run time for the program
+    start_time  = time.time()
+    
     # dict of list to store parameters
     #list of parameter to be stored
     parameter_list = ["F", "initialLearningRate", 'learningRateDecay','regularization' , 'momentum','min_train_loss','min_val_loss' ]
@@ -259,8 +263,8 @@ def finding_rbm_parameters(_F_list, _initialLearningRate_list, _learningRateDeca
                         # para to print
                         para_print = ''
                         para_print = 'F: ' + str(_F) + ' ' + 'InitialLearningRate: ' + str(_initialLearningRate) + ' '
-                        para_print = 'LearningRateDecay: ' + str(_learningRateDecay) + ' ' + 'Regularization: ' + str(_regularization) + ' '
-                        para_print = 'momentum: ' + str(_momentum) 
+                        para_print = para_print + 'LearningRateDecay: ' + str(_learningRateDecay) + ' ' + 'Regularization: ' + str(_regularization) + ' '
+                        para_print = para_print + 'momentum: ' + str(_momentum) 
                         print(para_print)
                         # run the rbm with the different combination of the parameters
                         rbm_results = rbm_model(_F,_initialLearningRate, _learningRateDecay, _regularization, _momentum)
@@ -290,6 +294,17 @@ def finding_rbm_parameters(_F_list, _initialLearningRate_list, _learningRateDeca
     # exporting the results to csv
     _stored_parameter_df.to_csv(filesavepath)
     
+    #save run time as the title of a txt file
+    runtime = str(time.time() - start_time)
+    # convert the seconds to minutes and hours
+    runtime = time.strftime("%H_%M_%S", time.gmtime(n))
+    # update the txtfilename containing the run date and run duration
+    txtfilename = today + '_runtime_' + runtime + '.txt'
+    # create the txt file
+    f= open(txtfilename,"w+")
+    # close the txt files
+    f.close() 
+
     # return _stored_parameter dict 
     return(_stored_parameter)
 
