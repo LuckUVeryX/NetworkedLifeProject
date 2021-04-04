@@ -250,6 +250,22 @@ def finding_rbm_parameters(_F_list, _initialLearningRate_list, _learningRateDeca
     for para in parameter_list:
         _stored_parameter[para] = []
 
+    # create folder if folder does not exits
+    # getting the date of running py
+    today = str(datetime.date.today())
+    # namming foldername based on today date
+    foldername = 'rbm_results_'+ today
+    # check if folder exist, if have return TRUE
+    folder_exists = os.path.exists(foldername)
+    if not folder_exists:
+        # addtional condition to ensure
+        os.makedirs(foldername)
+
+    # number of combination of hyper parameters
+    num_combi = len(_F_list)*len(_initialLearningRate_list)*len(_learningRateDecay_list)
+    num_combi = num_combi*len(_regularization_list)*len(_momentum_list)
+    current_left = num_combi
+
     # iterate in _F_list
     for _F in _F_list:
         # iterate in initialLearningRate
@@ -272,19 +288,26 @@ def finding_rbm_parameters(_F_list, _initialLearningRate_list, _learningRateDeca
                         #storing the rbm results into the dict to convert to df for exporting
                         for _para in _stored_parameter:
                             _stored_parameter[_para] = rbm_results[_para]
-    
-    # save results into a folder
-    # create folder if folder does not exits
-    # getting the date of running py
-    today = str(datetime.date.today())
-    # namming foldername based on today date
-    foldername = 'rbm_results_'+ today
-    # check if folder exist, if have return TRUE
-    folder_exists = os.path.exists(foldername)
-    if not folder_exists:
-        # addtional condition to ensure
-        os.makedirs(foldername)
-    
+
+                        #save results incase system crash
+                        # convert _stored_parameter to df and export as to csv
+                        _stored_parameter_df = pd.DataFrame.from_dict(_stored_parameter)
+                        # the outputfile name with today date
+                        outputfilename = 'stored_parameter_' + today + '.csv'
+                        # the file path
+                        filesavepath = foldername + '/' + outputfilename
+                        # exporting the results to csv
+                        _stored_parameter_df.to_csv(filesavepath)
+
+                        #save percentage complete as the title of a txt file
+                        current_left = current_left - 1
+                        percent_left =  round((current_left/ num_combi),2)
+                        # update the txtfilename containing the run date and run duration
+                        updatepercent = str(percent_left) + '.txt'
+                        percent = open(updatepercent,"w+")
+                        percent.close()
+                        
+    # save overall results into a folder
     # convert _stored_parameter to df and export as to csv
     _stored_parameter_df = pd.DataFrame.from_dict(_stored_parameter)
     # the outputfile name with today date
