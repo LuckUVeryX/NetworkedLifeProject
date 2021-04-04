@@ -26,6 +26,7 @@ print("val stats: ", vlStats['n_users'],
 K = 5
 
 # SET PARAMETERS HERE!!!
+# need to change to what was suggested from Ryan and
 # fixed parameters
 epochs = 100
 
@@ -284,32 +285,34 @@ def finding_rbm_parameters(_F_list, _initialLearningRate_list, _learningRateDeca
                         print(para_print)
                         # run the rbm with the different combination of the parameters
                         rbm_results = rbm_model(_F,_initialLearningRate, _learningRateDecay, _regularization, _momentum)
-
+                        
                         #storing the rbm results into the dict to convert to df for exporting
                         for _para in _stored_parameter:
-                            _stored_parameter[_para] = rbm_results[_para]
-
-                        #save results incase system crash
-                        # convert _stored_parameter to df and export as to csv
-                        _stored_parameter_df = pd.DataFrame.from_dict(_stored_parameter)
-                        # the outputfile name with today date
-                        outputfilename = 'stored_parameter_' + today + '.csv'
-                        # the file path
-                        filesavepath = foldername + '/' + outputfilename
-                        # exporting the results to csv
-                        _stored_parameter_df.to_csv(filesavepath)
-
-                        #save percentage complete as the title of a txt file
+                            _stored_parameter[_para].append(rbm_results[_para])
+                        
+                        # minus one for each combination done
                         current_left = current_left - 1
-                        percent_left =  round((current_left/ num_combi),2)
-                        # update the txtfilename containing the run date and run duration
-                        updatepercent = str(num_combi) + '_' +str(percent_left) + '.txt'
-                        percent = open(updatepercent,"w+")
-                        percent.close()
+
+                #save results incase system crash
+                # convert _stored_parameter to df and export as to csv
+                _stored_parameter_df = pd.DataFrame(data = _stored_parameter)
+                # the outputfile name with today date
+                outputfilename = 'stored_parameter_' + today + '.csv'
+                # the file path
+                filesavepath = foldername + '/' + outputfilename
+                # exporting the results to csv
+                _stored_parameter_df.to_csv(filesavepath)
+
+                #save percentage complete as the title of a txt file
+                percent_left =  round((current_left/ num_combi),2)
+                # update the txtfilename containing the run date and run duration
+                updatepercent = foldername + '/' + str(num_combi) + '_' +str(percent_left) + '.txt'
+                percent = open(updatepercent,"w+")
+                percent.close()
 
     # save overall results into a folder
     # convert _stored_parameter to df and export as to csv
-    _stored_parameter_df = pd.DataFrame.from_dict(_stored_parameter)
+    _stored_parameter_df = pd.DataFrame(_stored_parameter)
     # the outputfile name with today date
     outputfilename = 'stored_parameter_' + today + '.csv'
     # the file path
@@ -320,7 +323,7 @@ def finding_rbm_parameters(_F_list, _initialLearningRate_list, _learningRateDeca
     #save run time as the title of a txt file
     runtime = str(time.time() - start_time)
     # convert the seconds to minutes and hours
-    runtime = time.strftime("%H_%M_%S", time.gmtime(n))
+    runtime = time.strftime("%H_%M_%S", time.gmtime(runtime))
     # update the txtfilename containing the run date and run duration
     txtfilename = today + '_runtime_' + runtime + '.txt'
     # create the txt file
