@@ -303,10 +303,10 @@ def finding_rbm_parameters(_F_list, _initialLearningRate_list, _learningRateDeca
                         current_left = current_left - 1
                         percent_left =  round((current_left/ num_combi),2)
                         # update the txtfilename containing the run date and run duration
-                        updatepercent = str(percent_left) + '.txt'
+                        updatepercent = str(num_combi) + '_' +str(percent_left) + '.txt'
                         percent = open(updatepercent,"w+")
                         percent.close()
-                        
+
     # save overall results into a folder
     # convert _stored_parameter to df and export as to csv
     _stored_parameter_df = pd.DataFrame.from_dict(_stored_parameter)
@@ -343,10 +343,12 @@ F_list = parameters_list(8,10,1)
 # //gradientLearningRate = 0.1
 
 # * Use this to select ideal learning rate at epoch 1
-initialLearningRate_list = parameters_list(5,10,1)
+# initialLearningRate_list = parameters_list(0.01,0.05,0.01)
+initialLearningRate_list = [0.01, 0.1]
 #  TODO Hyper parameter tuning
 # ? Range from 1 to 5
-learningRateDecay_list = parameters_list(1,5,1)
+# learningRateDecay_list = parameters_list(1,5,1)
+learningRateDecay_list = [0.0001,0.001,0.01,0.1]
 
 # * Set the regularization strength here
 # TODO Hyper parameter tuning
@@ -356,7 +358,8 @@ regularization_list = parameters_list(0,0.05,0.01)
 # * Momemntum
 # TODO Hyper parameter tuning
 # ? 0 to 1
-momentum_list = parameters_list(0.5,1,0.1)
+# momentum_list = parameters_list(0.5,1,0.1)
+momentum_list = [0.5,0.9,0.99]
 
 abc = finding_rbm_parameters(F_list, initialLearningRate_list, learningRateDecay_list, 
                             regularization_list, momentum_list)
