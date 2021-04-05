@@ -1,0 +1,28 @@
+## testing parameter based on smaller parameter range
+epochs = 10
+
+# TODO Hyper parameter tuning F, (number of hidden units)
+# F in range of 8 to 50, increment of 1
+F_list = parameters_list(8,10,1)
+
+# * We are using adaptive learning rate instead of a fixed gradientLearningRate
+# //gradientLearningRate = 0.1
+
+# * Use this to select ideal learning rate at epoch 1
+# initialLearningRate_list = parameters_list(0.01,0.05,0.01)
+initialLearningRate_list = [0.01, 0.1]
+#  TODO Hyper parameter tuning
+# ? Range from 1 to 5
+# learningRateDecay_list = parameters_list(1,5,1)
+learningRateDecay_list = [0.0001,0.001,0.01,0.1]
+
+# * Set the regularization strength here
+# TODO Hyper parameter tuning
+# ? Range from 0 to 0.05
+regularization_list = parameters_list(0,0.05,0.01)
+
+# * Momemntum
+# TODO Hyper parameter tuning
+# ? 0 to 1
+# momentum_list = parameters_list(0.5,1,0.1)
+momentum_list = [0.5,0.9,0.99]
