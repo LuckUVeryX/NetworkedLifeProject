@@ -354,11 +354,11 @@ F_list = parameters_list(8,9,1)
 # initialLearningRate_list with increment of 0.001
 initialLearningRate_list = parameters_list(0.001,0.005,0.001)
 # initialLearningRate_list with increment of 0.01
-initialLearningRate_list = parameters_list(0.01,0.05,0.01)
+initialLearningRate_list.extend(parameters_list(0.01,0.05,0.01))
 # extend initialLearningRate_list with element of incerment 0.1
-initialLearningRate_list = initialLearningRate_list.extend(parameters_list(0.1,0.5,0.1))
+initialLearningRate_list.extend(parameters_list(0.1,0.5,0.1))
 # extend initialLearningRate_list with element of incerment 1
-initialLearningRate_list = initialLearningRate_list.extend(parameters_list(1,5,1))
+initialLearningRate_list.extend(parameters_list(1,5,1))
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
 
 #  TODO Hyper parameter tuning
