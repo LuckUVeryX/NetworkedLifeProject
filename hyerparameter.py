@@ -351,19 +351,22 @@ F_list = parameters_list(8,9,1)
 # //gradientLearningRate = 0.1
 
 # * Use this to select ideal learning rate at epoch 1
+## Fix learningRateDecay_list
 # initialLearningRate_list = [0.01, 0.1]
 
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
-## fix rest, vary initialLearningRate_list 
-# initialLearningRate_list with increment of 0.001
-initialLearningRate_list = parameters_list(0.001,0.005,0.001)
-# initialLearningRate_list with increment of 0.01
-initialLearningRate_list.extend(parameters_list(0.01,0.05,0.01))
-# extend initialLearningRate_list with element of incerment 0.1
-initialLearningRate_list.extend(parameters_list(0.1,0.5,0.1))
-# extend initialLearningRate_list with element of incerment 1
-initialLearningRate_list.extend(parameters_list(1,5,1))
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
+# #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
+# ## fix rest, vary initialLearningRate_list 
+# # initialLearningRate_list with increment of 0.001
+# initialLearningRate_list = parameters_list(0.001,0.005,0.001)
+# # initialLearningRate_list with increment of 0.01
+# initialLearningRate_list.extend(parameters_list(0.01,0.05,0.01))
+# # extend initialLearningRate_list with element of incerment 0.1
+# initialLearningRate_list.extend(parameters_list(0.1,0.5,0.1))
+# # extend initialLearningRate_list with element of incerment 1
+# initialLearningRate_list.extend(parameters_list(1,5,1))
+# #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
+# ## seems like incremeent of 0.1 is good for hyperparameter tunning
+# ## do not need to vary the magnitude of tunning as it is not the lower or upper bound of tunning parameter
 
 #  TODO Hyper parameter tuning
 # ? Range from 1 to 5
@@ -371,6 +374,23 @@ initialLearningRate_list.extend(parameters_list(1,5,1))
 # learningRateDecay_list = [0.0001,0.001,0.01,0.1]
 ## Fix learningRateDecay_list
 learningRateDecay_list = [0.01, 0.1]
+
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
+## fix rest, vary learningRateDecay_list 
+# learningRateDecay_list with increment of 0.0001
+initialLearningRate_list = parameters_list(0.0001,0.0005,0.0005)
+# learningRateDecay_list with increment of 0.001
+initialLearningRate_list.extend(parameters_list(0.001,0.005,0.001))
+# extend learningRateDecay_list with element of incerment 0.01
+initialLearningRate_list.extend(parameters_list(0.01,0.05,0.01))
+# extend learningRateDecay_list with element of incerment 0.1
+initialLearningRate_list.extend(parameters_list(0.1,0.5,0.1))
+# extend learningRateDecay_list with element of incerment 1
+initialLearningRate_list.extend(parameters_list(1,5,1))
+# extend learningRateDecay_list with element of incerment 10
+initialLearningRate_list.extend(parameters_list(10,50,10))
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
+
 
 # * Set the regularization strength here
 # TODO Hyper parameter tuning
