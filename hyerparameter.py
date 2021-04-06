@@ -241,7 +241,7 @@ def rbm_model(_F,_initialLearningRate, _learningRateDecay, _regularization, _mom
 def finding_rbm_parameters(_F_list, _initialLearningRate_list, _learningRateDecay_list, 
                             _regularization_list, _momentum_list):
     #measure run time for the program
-    start_time  = time.time()
+    start_time  = datetime.datetime.now()
     
     # dict of list to store parameters
     #list of parameter to be stored
@@ -321,11 +321,15 @@ def finding_rbm_parameters(_F_list, _initialLearningRate_list, _learningRateDeca
     _stored_parameter_df.to_csv(filesavepath)
     
     #save run time as the title of a txt file
-    runtime = str(time.time() - start_time)
-    # convert the seconds to minutes and hours
-    runtime = time.strftime("%H_%M_%S", time.gmtime(runtime))
+    runtime = str(datetime.datetime.now() - begin_time)
+    runtime = runtime.replace(":", "_")
+
+    ## commented out to check this change would work if used datetime.datetime.now() - begin_time
+    # # convert the seconds to minutes and hours
+    # runtime = time.strftime("%H_%M_%S", time.gmtime(runtime))
+    
     # update the txtfilename containing the run date and run duration
-    txtfilename = str(today) + '_runtime_' + str(runtime) + '.txt'
+    txtfilename = str(today) + '_runtime_' + runtime + '.txt'
     # create the txt file
     f= open(txtfilename,"w+")
     # close the txt files
