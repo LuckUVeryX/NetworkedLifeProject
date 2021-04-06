@@ -241,7 +241,7 @@ def rbm_model(_F,_initialLearningRate, _learningRateDecay, _regularization, _mom
 def finding_rbm_parameters(_F_list, _initialLearningRate_list, _learningRateDecay_list, 
                             _regularization_list, _momentum_list):
     #measure run time for the program
-    start_time  = datetime.datetime.now()
+    begin_time  = datetime.datetime.now()
     
     # dict of list to store parameters
     #list of parameter to be stored
@@ -324,6 +324,7 @@ def finding_rbm_parameters(_F_list, _initialLearningRate_list, _learningRateDeca
     runtime = str(datetime.datetime.now() - begin_time)
     runtime = runtime.replace(":", "_")
 
+    ## remove this after fix rest, vary learningRateDecay_list test run
     ## commented out to check this change would work if used datetime.datetime.now() - begin_time
     # # convert the seconds to minutes and hours
     # runtime = time.strftime("%H_%M_%S", time.gmtime(runtime))
@@ -345,6 +346,7 @@ epochs = 10
 # TODO Hyper parameter tuning F, (number of hidden units)
 # F in range of 8 to 50, increment of 1
 # F can only interger as rmb function would product: TypeError: 'float' object cannot be interpreted as an integer
+# can do more testing to vary more of the F_list to see  what are to suitable values of F
 F_list = parameters_list(8,9,1)
 
 # * We are using adaptive learning rate instead of a fixed gradientLearningRate
@@ -352,7 +354,7 @@ F_list = parameters_list(8,9,1)
 
 # * Use this to select ideal learning rate at epoch 1
 ## Fix learningRateDecay_list
-# initialLearningRate_list = [0.01, 0.1]
+initialLearningRate_list = [0.01, 0.1]
 
 # #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
 # ## fix rest, vary initialLearningRate_list 
