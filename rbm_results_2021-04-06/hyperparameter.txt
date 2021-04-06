@@ -1,0 +1,41 @@
+## testing parameter based on smaller parameter range
+epochs = 10
+
+# TODO Hyper parameter tuning F, (number of hidden units)
+# F can only interger as rmb function would product: TypeError: 'float' object cannot be interpreted as an integer
+# can do more testing to vary more of the F_list to see  what are to suitable values of F
+F_list = parameters_list(8,9,1)
+
+# * We are using adaptive learning rate instead of a fixed gradientLearningRate
+# //gradientLearningRate = 0.1
+
+# * Use this to select ideal learning rate at epoch 1
+## Fix all, vary initialLearningRate_list 
+# initialLearningRate_list with increment of 0.0001
+initialLearningRate_list = parameters_list(0.0001,0.0005,0.0005)
+# initialLearningRate_list with increment of 0.001
+initialLearningRate_list.extend(parameters_list(0.001,0.005,0.001))
+# extend initialLearningRate_list with element of incerment 0.01
+initialLearningRate_list.extend(parameters_list(0.01,0.05,0.01))
+# extend initialLearningRate_list with element of incerment 0.1
+initialLearningRate_list.extend(parameters_list(0.1,0.5,0.1))
+# extend initialLearningRate_list with element of incerment 1
+initialLearningRate_list.extend(parameters_list(1,5,1))
+# extend initialLearningRate_list with element of incerment 10
+initialLearningRate_list.extend(parameters_list(10,50,10))
+
+#  TODO Hyper parameter tuning
+# ? Range from 1 to 5
+## Fix learningRateDecay_list
+learningRateDecay_list = [0.01, 0.1]
+
+
+# * Set the regularization strength here
+# TODO Hyper parameter tuning
+## Fix regularization_list
+regularization_list = [0, 0.01, 0.02]
+
+# * Momemntum
+# TODO Hyper parameter tuning
+## Fix momentum_list
+momentum_list = [0.5,0.99]
