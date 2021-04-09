@@ -18,7 +18,7 @@ vlStats = lib.getUsefulStats(validation)
 # Ratings from 1-5
 K = 5
 
-epochs = 50
+epochs = 1
 
 # TODO Hyper parameter tuning
 # number of hidden units
@@ -66,8 +66,10 @@ def hyperparameterTuning():
     y = 0
 
     plot_dimension = get_plot_dimension()
+    # ! Resize this if training with many different parameters
+    # ? Might want to test with epochs = 1 to see if pdf will fit the plots
     fig, axs = plt.subplots(
-        plot_dimension, plot_dimension, sharex=True, sharey=True, figsize=(60, 20))  # ! Resize this if training with many different parameters
+        plot_dimension, plot_dimension, sharex=True, sharey=True, figsize=(60, 20))
 
     # Loop over the different parameters
     for a in range(len(F)):
