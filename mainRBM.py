@@ -191,6 +191,8 @@ def main(K, F, epochs, initialLearningRate, learningRateDecay, regularization, m
     # plt.show()
     plt.draw()
 
+    return min(val_loss)
+
     ### END ###
     # predictedRatings = np.array(
     #     [rbm.predictForUserWithBias(user, bestWeights, best_hidden_bias, best_visible_bias, training) for user in trStats["u_users"]])
