@@ -20,7 +20,7 @@ K = 5
 # SET PARAMETERS HERE!!!
 # number of hidden units
 # TODO Hyper parameter tuning F, (number of hidden units)
-F = 15
+F = [15]
 epochs = 2
 
 # * We are using adaptive learning rate instead of a fixed gradientLearningRate
@@ -34,12 +34,35 @@ learningRateDecay = [0.5, 0.1]
 # * Set the regularization strength here
 # TODO Hyper parameter tuning
 # ? Range from 0 to 0.05
-regularization = [0.01, 0]
+regularization = [0.01]
 
 # * Momemntum
 # TODO Hyper parameter tuning
 # ? 0 to 1
-momentum = 0.9
+momentum = [0.9]
+
+
+def get_plot_dimension():
+    num_plots = len(F) * len(initialLearningRate) * \
+        len(learningRateDecay) * len(regularization) * len(momentum)
+
+    return int(np.ceil(np.sqrt(num_plots)))
+
+
+def update_plot_location(x, y, dimension):
+    if x < dimension - 1:
+        x += 1
+    else:
+        y += 1
+        x = 0
+    return x, y
+
+
+def get_current_date_and_time():
+    now = datetime.now()
+    date = now.strftime("%d%m%Y")
+    time = now.strftime("%H%M")
+    return date, time
 
 
 def hyperparameterTuning():
@@ -48,54 +71,48 @@ def hyperparameterTuning():
     x = 0
     y = 0
 
-    # ! Update based on the number of parameters testing
-    num_plots = len(initialLearningRate) * len(learningRateDecay)
-    num_plot_dimension = int(np.ceil(np.sqrt(num_plots)))
-    print(num_plot_dimension)
+    plot_dimension = get_plot_dimension()
+    fig, axs = plt.subplots(plot_dimension, plot_dimension)
 
-    fig, axs = plt.subplots(num_plot_dimension, num_plot_dimension)
+    # Loop over the different parameters
+    for a in range(len(F)):
+        for b in range(len(initialLearningRate)):
+            for c in range(len(learningRateDecay)):
+                for d in range(len(regularization)):
+                    for e in range(len(momentum)):
 
-    # ! Loop over the different parameters
-    for i in range(len(initialLearningRate)):
-        for j in range(len(learningRateDecay)):
+                        print("----------Training with F {}, initLearningRate {}, learningRateDecay {}, regularization {}, momentum {}----------".format(
+                            F[a], initialLearningRate[b], learningRateDecay[c], regularization[d], momentum[e]))
 
-            # ! Modify print statement to reflect training parameters
-            print("----------Training with decay rate {} and initial learning rate {}----------".format(
-                initialLearningRate[i], learningRateDecay[j]))
+                        train_loss, val_loss = mainRBM.main(K=K,
+                                                            epochs=epochs,
+                                                            F=F[a],
+                                                            initialLearningRate=initialLearningRate[b],
+                                                            learningRateDecay=learningRateDecay[c],
+                                                            regularization=regularization[d],
+                                                            momentum=momentum[e])
 
-            # ! Update the training function
-            train_loss, val_loss = mainRBM.main(K=K,
-                                                F=F,
-                                                epochs=epochs,
-                                                initialLearningRate=initialLearningRate[i],
-                                                learningRateDecay=learningRateDecay[j],
-                                                regularization=regularization,
-                                                momentum=momentum)
+                        # Append results in the form of dictionary
+                        results.append({"Validation Loss": min(val_loss),
+                                        "F": F[a],
+                                        "Init Learn Rate": initialLearningRate[b],
+                                        "Learn Rate Decay": learningRateDecay[c],
+                                        "Regularization": regularization[d],
+                                        "Momentum": momentum[e]
+                                        })
 
-            # ! Add parameter to dictionary
-            results.append({"Validation Loss": min(val_loss),
-                            "Init Learn Rate": initialLearningRate[i],
-                            "Learn Rate Decay": learningRateDecay[j]})
+                        # Plot the evolution of training and validation RMSE
+                        axs[x, y].plot(train_loss)
+                        axs[x, y].plot(val_loss)
+                        axs[x, y].set(xlabel='epoch', ylabel='RMSE')
+                        axs[x, y].set_title('F {}, LR {}, Decay {}, Reg {}, Mmt {}'.format(
+                            F[a], initialLearningRate[b], learningRateDecay[c], regularization[d], momentum[e]))
 
-            # plot the evolution of training and validation RMSE
-            # ! Update the title of plots
-            axs[x, y].plot(train_loss)
-            axs[x, y].plot(val_loss)
-            axs[x, y].set(xlabel='epoch', ylabel='RMSE')
-            axs[x, y].set_title('LR {} & Decay {}'.format(
-                initialLearningRate[i], learningRateDecay[j]))
+                        # Update the index to plot plots
+                        x, y = update_plot_location(x, y, plot_dimension)
 
-            # Update the index to plot plots
-            if x < num_plot_dimension - 1:
-                x += 1
-            else:
-                y += 1
-                x = 0
-
-    # * Code to output predictions without overwriting
-    now = datetime.now()
-    date = now.strftime("%d%m%Y")
-    time = now.strftime("%H%M")
+    # Code to output predictions without overwriting by using current date time
+    date, time = get_current_date_and_time()
     if not os.path.exists('predictions/{}/'.format(date)):
         os.makedirs('predictions/{}/'.format(date))
 
@@ -113,4 +130,5 @@ def hyperparameterTuning():
     plt.show()
 
 
+# Run main hyperparameter tuning function
 hyperparameterTuning()
