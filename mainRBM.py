@@ -178,20 +178,7 @@ def main(K, F, epochs, initialLearningRate, learningRateDecay, regularization, m
             lr0=initialLearningRate, epoch=epoch, k=learningRateDecay))
         print("")
 
-    # plot the evolution of training and validation RMSE
-    plt.figure(figsize=(8, 8))
-    plt.plot(train_loss, label='Training Loss')
-    plt.plot(val_loss, label='Validation Loss')
-    plt.legend(loc='upper right')
-    plt.ylabel('RMSE')
-    plt.ylim([0, 2.0])
-    plt.title('Training and Validation Loss for learning rate {} and decay {}'.format(
-        initialLearningRate, learningRateDecay))
-    plt.xlabel('epoch')
-    # plt.show()
-    plt.draw()
-
-    return min(val_loss)
+    return train_loss, val_loss
 
     ### END ###
     # predictedRatings = np.array(
