@@ -21,7 +21,7 @@ K = 5
 # number of hidden units
 # TODO Hyper parameter tuning F, (number of hidden units)
 F = [15]
-epochs = 3
+epochs = 50
 
 # * We are using adaptive learning rate instead of a fixed gradientLearningRate
 # //gradientLearningRate = 0.1
@@ -73,7 +73,7 @@ def hyperparameterTuning():
 
     plot_dimension = get_plot_dimension()
     fig, axs = plt.subplots(
-        plot_dimension, plot_dimension, sharex=True, sharey=True, figsize=(50, 50))
+        plot_dimension, plot_dimension, sharex=True, sharey=True, figsize=(60, 20))
 
     # Loop over the different parameters
     for a in range(len(F)):
@@ -118,16 +118,20 @@ def hyperparameterTuning():
         os.makedirs('predictions/{}/'.format(date))
 
     # Output CSV
+    print('--- Writing to CSV ---')
     df = pd.DataFrame(results)
     df = df.sort_values(by='Validation Loss', ascending=True)
     df.to_csv("predictions/{}/{}.csv".format(date, time))
 
     # Output Plot
+    print("--- Plotting in progress ---")
     for ax in axs.flat:
         ax.label_outer()
     line_labels = ["Training Loss", "Validation Loss"]
     fig.legend(labels=line_labels)
-    plt.savefig("predictions/{}/{}.pdf".format(date, time), dpi=1000)
+    print("--- Saving plots... ---")
+    plt.savefig("predictions/{}/{}.pdf".format(date, time))
+    # print("--- Loading Plot... ---")
     plt.show()
 
 
