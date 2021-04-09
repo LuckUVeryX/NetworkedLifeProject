@@ -2,6 +2,7 @@ import mainRBM
 import projectLib as lib
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
 from datetime import datetime
 import os
 
@@ -20,7 +21,7 @@ K = 5
 # number of hidden units
 # TODO Hyper parameter tuning F, (number of hidden units)
 F = 15
-epochs = 15
+epochs = 2
 
 # * We are using adaptive learning rate instead of a fixed gradientLearningRate
 # //gradientLearningRate = 0.1
@@ -33,7 +34,7 @@ learningRateDecay = [0.5, 0.1]
 # * Set the regularization strength here
 # TODO Hyper parameter tuning
 # ? Range from 0 to 0.05
-regularization = 0.01
+regularization = [0.01, 0]
 
 # * Momemntum
 # TODO Hyper parameter tuning
@@ -44,15 +45,25 @@ momentum = 0.9
 def hyperparameterTuning():
     # Initialise Variables
     results = []
-    fig, axs = plt.subplots(len(initialLearningRate),
-                            len(learningRateDecay))
+    x = 0
+    y = 0
 
+    # ! Update based on the number of parameters testing
+    num_plots = len(initialLearningRate) * len(learningRateDecay)
+    num_plot_dimension = int(np.ceil(np.sqrt(num_plots)))
+    print(num_plot_dimension)
+
+    fig, axs = plt.subplots(num_plot_dimension, num_plot_dimension)
+
+    # ! Loop over the different parameters
     for i in range(len(initialLearningRate)):
         for j in range(len(learningRateDecay)):
 
+            # ! Modify print statement to reflect training parameters
             print("----------Training with decay rate {} and initial learning rate {}----------".format(
                 initialLearningRate[i], learningRateDecay[j]))
 
+            # ! Update the training function
             train_loss, val_loss = mainRBM.main(K=K,
                                                 F=F,
                                                 epochs=epochs,
@@ -61,17 +72,25 @@ def hyperparameterTuning():
                                                 regularization=regularization,
                                                 momentum=momentum)
 
+            # ! Add parameter to dictionary
             results.append({"Validation Loss": min(val_loss),
                             "Init Learn Rate": initialLearningRate[i],
                             "Learn Rate Decay": learningRateDecay[j]})
 
             # plot the evolution of training and validation RMSE
-            # axs.legend(loc='upper right')
-            axs[i, j].plot(train_loss)
-            axs[i, j].plot(val_loss)
-            axs[i, j].set(xlabel='epoch', ylabel='RMSE')
-            axs[i, j].set_title('LR {} & Decay {}'.format(
+            # ! Update the title of plots
+            axs[x, y].plot(train_loss)
+            axs[x, y].plot(val_loss)
+            axs[x, y].set(xlabel='epoch', ylabel='RMSE')
+            axs[x, y].set_title('LR {} & Decay {}'.format(
                 initialLearningRate[i], learningRateDecay[j]))
+
+            # Update the index to plot plots
+            if x < num_plot_dimension - 1:
+                x += 1
+            else:
+                y += 1
+                x = 0
 
     # * Code to output predictions without overwriting
     now = datetime.now()
