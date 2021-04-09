@@ -21,7 +21,7 @@ K = 5
 # number of hidden units
 # TODO Hyper parameter tuning F, (number of hidden units)
 F = [15]
-epochs = 2
+epochs = 50
 
 # * We are using adaptive learning rate instead of a fixed gradientLearningRate
 # //gradientLearningRate = 0.1
@@ -29,17 +29,17 @@ epochs = 2
 initialLearningRate = [0.5, 0.1]
 #  TODO Hyper parameter tuning
 # ? Range from 0.01 to 1
-learningRateDecay = [0.5, 0.1]
+learningRateDecay = [0.1, 0.5]
 
 # * Set the regularization strength here
 # TODO Hyper parameter tuning
 # ? Range from 0 to 0.05
-regularization = [0.01]
+regularization = [0.01, 0.05]
 
 # * Momemntum
 # TODO Hyper parameter tuning
 # ? 0 to 1
-momentum = [0.9]
+momentum = [0.9, 0.99]
 
 
 def get_plot_dimension():
@@ -72,7 +72,8 @@ def hyperparameterTuning():
     y = 0
 
     plot_dimension = get_plot_dimension()
-    fig, axs = plt.subplots(plot_dimension, plot_dimension)
+    fig, axs = plt.subplots(
+        plot_dimension, plot_dimension, sharex=True, sharey=True)
 
     # Loop over the different parameters
     for a in range(len(F)):
