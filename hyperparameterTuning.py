@@ -21,7 +21,7 @@ K = 5
 # number of hidden units
 # TODO Hyper parameter tuning F, (number of hidden units)
 F = [15]
-epochs = 50
+epochs = 3
 
 # * We are using adaptive learning rate instead of a fixed gradientLearningRate
 # //gradientLearningRate = 0.1
@@ -73,7 +73,7 @@ def hyperparameterTuning():
 
     plot_dimension = get_plot_dimension()
     fig, axs = plt.subplots(
-        plot_dimension, plot_dimension, sharex=True, sharey=True)
+        plot_dimension, plot_dimension, sharex=True, sharey=True, figsize=(50, 50))
 
     # Loop over the different parameters
     for a in range(len(F)):
@@ -127,7 +127,7 @@ def hyperparameterTuning():
         ax.label_outer()
     line_labels = ["Training Loss", "Validation Loss"]
     fig.legend(labels=line_labels)
-    plt.savefig("predictions/{}/{}.pdf".format(date, time))
+    plt.savefig("predictions/{}/{}.pdf".format(date, time), dpi=1000)
     plt.show()
 
 
