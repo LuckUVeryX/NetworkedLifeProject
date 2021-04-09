@@ -14,30 +14,24 @@ validation = lib.getValidationData()
 trStats = lib.getUsefulStats(training)
 vlStats = lib.getUsefulStats(validation)
 
-# ! Parameters
+# * Parameters
+# Ratings from 1-5
 K = 5
 
-# SET PARAMETERS HERE!!!
-# number of hidden units
-# TODO Hyper parameter tuning F, (number of hidden units)
-F = [15]
 epochs = 50
 
-# * We are using adaptive learning rate instead of a fixed gradientLearningRate
-# //gradientLearningRate = 0.1
-# * Use this to select ideal learning rate at epoch 1
+# TODO Hyper parameter tuning
+# number of hidden units
+F = [15]
+
 initialLearningRate = [0.5, 0.1]
-#  TODO Hyper parameter tuning
+
 # ? Range from 0.01 to 1
 learningRateDecay = [0.1, 0.5]
 
-# * Set the regularization strength here
-# TODO Hyper parameter tuning
 # ? Range from 0 to 0.05
 regularization = [0.01, 0.05]
 
-# * Momemntum
-# TODO Hyper parameter tuning
 # ? 0 to 1
 momentum = [0.9, 0.99]
 
@@ -73,7 +67,7 @@ def hyperparameterTuning():
 
     plot_dimension = get_plot_dimension()
     fig, axs = plt.subplots(
-        plot_dimension, plot_dimension, sharex=True, sharey=True, figsize=(60, 20))
+        plot_dimension, plot_dimension, sharex=True, sharey=True, figsize=(60, 20))  # ! Resize this if training with many different parameters
 
     # Loop over the different parameters
     for a in range(len(F)):
