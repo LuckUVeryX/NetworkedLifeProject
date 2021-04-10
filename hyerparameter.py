@@ -399,29 +399,43 @@ learningRateDecay_list = [0.01, 0.1]
 # ? Range from 0 to 0.05
 # regularization_list = parameters_list(0,0.05,0.01)
 ## Fix regularization_list
-# regularization_list = [0, 0.01, 0.02]
+regularization_list = [0, 0.01, 0.02]
+
+# #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
+# ## fix rest, vary regularization_list 
+# # regularization_list with increment of 0.000001   
+# regularization_list = parameters_list(0.000001,0.000005,0.000001)
+# # regularization_list with increment of 0.00001
+# regularization_list.extend(parameters_list(0.00001,0.00005,0.00001))
+# # extend regularization_list with element of incerment 0.0001
+# regularization_list.extend(parameters_list(0.0001,0.0005,0.0001))
+# # extend regularization_list with element of incerment 0.001
+# regularization_list.extend(parameters_list(0.001,0.005,0.001))
+# # # extend regularization_list with element of incerment 1
+# regularization_list.extend(parameters_list(1,5,1))
+# #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
+
+# * Momemntum
+# TODO Hyper parameter tuning
+## Fix momentum_list
+# momentum_list = [0.5,0.99]
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
 ## fix rest, vary regularization_list 
 # regularization_list with increment of 0.0001
-regularization_list = parameters_list(0.000001,0.000005,0.000001)
+momentum_list = parameters_list(0.0001,0.0005,0.0001)
 # regularization_list with increment of 0.001
-regularization_list.extend(parameters_list(0.00001,0.00005,0.00001))
+momentum_list.extend(parameters_list(0.001,0.005,0.001))
 # extend regularization_list with element of incerment 0.01
-regularization_list.extend(parameters_list(0.0001,0.0005,0.0001))
+momentum_list.extend(parameters_list(0.01,0.05,0.01))
 # extend regularization_list with element of incerment 0.1
-regularization_list.extend(parameters_list(0.001,0.005,0.001))
+momentum_list.extend(parameters_list(0.1,0.5,0.1))
 # # extend regularization_list with element of incerment 1
-regularization_list.extend(parameters_list(1,5,1))
+momentum_list.extend(parameters_list(1,5,1))
+# # extend regularization_list with element of incerment 10
+momentum_list.extend(parameters_list(10,50,10))
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
 
-# * Momemntum
-# TODO Hyper parameter tuning
-# ? 0 to 1
-# momentum_list = parameters_list(0.5,1,0.1)
-# momentum_list = [0.5,0.9,0.99]
-## Fix momentum_list
-momentum_list = [0.5,0.99]
 
 abc = finding_rbm_parameters(F_list, initialLearningRate_list, learningRateDecay_list, 
                             regularization_list, momentum_list)
