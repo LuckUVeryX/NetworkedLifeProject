@@ -196,5 +196,5 @@ def main(K, F, epochs, initialLearningRate, learningRateDecay, regularization, m
 
 
 # * Function to train model
-main(K, F, epochs, initialLearningRate,
-     learningRateDecay, regularization, momentum, True)
+# main(K, F, epochs, initialLearningRate,
+#      learningRateDecay, regularization, momentum, True)
