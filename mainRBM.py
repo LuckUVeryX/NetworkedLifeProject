@@ -1,4 +1,3 @@
-from hyperparameterTuning import hyperparameterTuning
 import numpy as np
 import rbm
 import projectLib as lib
