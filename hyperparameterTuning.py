@@ -18,7 +18,7 @@ vlStats = lib.getUsefulStats(validation)
 # Ratings from 1-5
 K = 5
 
-epochs = 50
+epochs = 1
 
 # TODO Hyper parameter tuning
 # number of hidden units
@@ -27,10 +27,10 @@ F = [15]
 initialLearningRate = [0.3, 0.1]
 
 # ? Range from 0.01 to 1
-learningRateDecay = [0.1, 0.5]
+learningRateDecay = [0.1]
 
 # ? Range from 0 to 0.05
-regularization = [0.01, 0.05, 0.1]
+regularization = [0.01, 0.05]
 
 # ? 0 to 1
 momentum = [0.99]
