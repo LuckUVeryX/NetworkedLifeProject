@@ -19,22 +19,22 @@ vlStats = lib.getUsefulStats(validation)
 # Ratings from 1-5
 K = 5
 
-epochs = 2
+epochs = 80
 
 # TODO Hyper parameter tuning
 # number of hidden units
-F = [15]
+F = [15, 50]
 
 initialLearningRate = [0.3, 0.1]
 
 # ? Range from 0.01 to 1
-learningRateDecay = [0.3]
+learningRateDecay = [0.3, 0.1]
 
 # ? Range from 0 to 0.05
-regularization = [0.05]
+regularization = [0.05, 0.1]
 
 # ? 0 to 1
-momentum = [0.99]
+momentum = [0.9, 0.99]
 
 
 def get_plot_dimension():
@@ -76,7 +76,7 @@ def hyperparameterTuning():
                 for d in range(len(regularization)):
                     for e in range(len(momentum)):
 
-                        print("- Training with F {}, initLearningRate {}, decay {}, regularization {}, momentum {} -".format(
+                        print("--- Training with F {}, initLearningRate {}, decay {}, regularization {}, momentum {}".format(
                             F[a], initialLearningRate[b], learningRateDecay[c], regularization[d], momentum[e]))
 
                         train_loss, val_loss, trained_weights, trained_hidden_bias, trained_visible_bias = mainRBM.main(K=K,

@@ -170,7 +170,7 @@ def main(K, F, epochs, initialLearningRate, learningRateDecay, regularization, m
             trained_hidden_bias = hidden_bias
             trained_visible_bias = visible_bias
 
-        print("### EPOCH %d ###" % epoch)
+        print("--- EPOCH %d" % epoch)
         print("Training loss = %f" % trRMSE)
         print("Validation loss = %f" % vlRMSE)
         print("Learning Rate = %f" % rbm.getAdaptiveLearningRate(
