@@ -1,10 +1,11 @@
+import rbm
 import mainRBM
 import projectLib as lib
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-from datetime import datetime
 import os
+from datetime import datetime
 
 training = lib.getTrainingData()
 validation = lib.getValidationData()
@@ -18,7 +19,7 @@ vlStats = lib.getUsefulStats(validation)
 # Ratings from 1-5
 K = 5
 
-epochs = 1
+epochs = 2
 
 # TODO Hyper parameter tuning
 # number of hidden units
@@ -27,10 +28,10 @@ F = [15]
 initialLearningRate = [0.3, 0.1]
 
 # ? Range from 0.01 to 1
-learningRateDecay = [0.1]
+learningRateDecay = [0.3]
 
 # ? Range from 0 to 0.05
-regularization = [0.01, 0.05]
+regularization = [0.05]
 
 # ? 0 to 1
 momentum = [0.99]
@@ -52,16 +53,13 @@ def update_plot_location(x, y, dimension):
     return x, y
 
 
-def get_current_date_and_time():
-    now = datetime.now()
-    date = now.strftime("%d%m%Y")
-    time = now.strftime("%H%M")
-    return date, time
-
-
 def hyperparameterTuning():
+    print("--- Commencing Hyper Parameter Tuning ---")
+    start_time = datetime.now().replace(microsecond=0)
     # Initialise Variables
     results = []
+    best_val_loss = np.inf
+
     x = 0
     y = 0
 
@@ -78,17 +76,19 @@ def hyperparameterTuning():
                 for d in range(len(regularization)):
                     for e in range(len(momentum)):
 
-                        print("----------Training with F {}, initLearningRate {}, decay {}, regularization {}, momentum {}----------".format(
+                        print("- Training with F {}, initLearningRate {}, decay {}, regularization {}, momentum {} -".format(
                             F[a], initialLearningRate[b], learningRateDecay[c], regularization[d], momentum[e]))
 
-                        train_loss, val_loss = mainRBM.main(K=K,
-                                                            epochs=epochs,
-                                                            F=F[a],
-                                                            initialLearningRate=initialLearningRate[b],
-                                                            learningRateDecay=learningRateDecay[c],
-                                                            regularization=regularization[d],
-                                                            momentum=momentum[e],
-                                                            makePredictions=False)
+                        train_loss, val_loss, trained_weights, trained_hidden_bias, trained_visible_bias = mainRBM.main(K=K,
+                                                                                                                        epochs=epochs,
+                                                                                                                        F=F[a],
+                                                                                                                        initialLearningRate=initialLearningRate[
+                                                                                                                            b],
+                                                                                                                        learningRateDecay=learningRateDecay[
+                                                                                                                            c],
+                                                                                                                        regularization=regularization[
+                                                                                                                            d],
+                                                                                                                        momentum=momentum[e])
 
                         # Append results in the form of dictionary
                         results.append({"Validation Loss": min(val_loss),
@@ -98,6 +98,13 @@ def hyperparameterTuning():
                                         "Regularization": regularization[d],
                                         "Momentum": momentum[e]
                                         })
+
+                        # Save the weights and biases of the best model
+                        if min(val_loss) < best_val_loss:
+                            best_val_loss = min(val_loss)
+                            best_weights = trained_weights
+                            best_hidden_bias = trained_hidden_bias
+                            best_visible_bias = trained_visible_bias
 
                         # Plot the evolution of training and validation RMSE
                         axs[x, y].plot(train_loss)
@@ -110,7 +117,7 @@ def hyperparameterTuning():
                         x, y = update_plot_location(x, y, plot_dimension)
 
     # Code to output predictions without overwriting by using current date time
-    date, time = get_current_date_and_time()
+    date, time = mainRBM.get_current_date_and_time()
     if not os.path.exists('predictions/{}/'.format(date)):
         os.makedirs('predictions/{}/'.format(date))
 
@@ -120,6 +127,15 @@ def hyperparameterTuning():
     df = df.sort_values(by='Validation Loss', ascending=True)
     df.to_csv("predictions/{}/{}.csv".format(date, time))
 
+    # Output best ratings
+    print("--- Predicting ratings... ---")
+    bestPredictedRatings = np.array(
+        [rbm.predictForUserWithBias(user, best_weights, best_hidden_bias, best_visible_bias, training) for user in trStats["u_users"]])
+
+    print("--- Saving predictions ---")
+    np.savetxt("predictions/{}/{}_bestPredictedRatings.txt".format(date, time),
+               bestPredictedRatings)
+
     # Output Plot
     print("--- Plotting in progress ---")
     for ax in axs.flat:
@@ -128,7 +144,12 @@ def hyperparameterTuning():
     fig.legend(labels=line_labels)
     print("--- Saving plots... ---")
     plt.savefig("predictions/{}/{}.pdf".format(date, time))
-    # print("--- Loading Plot... ---")
+
+    end_time = datetime.now().replace(microsecond=0)
+    print("--- Finished hyperparameter tuning ---")
+    print("--- Time Taken ---")
+    print("--- {} ---".format(end_time-start_time))
+
     plt.show()
 
 

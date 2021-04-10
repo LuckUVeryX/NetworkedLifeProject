@@ -39,13 +39,14 @@ regularization = 0.05
 momentum = 0.3
 
 
-def get_current_date():
+def get_current_date_and_time():
     now = datetime.now()
     date = now.strftime("%d%m%Y")
-    return date
+    time = now.strftime("%H%M")
+    return date, time
 
 
-def main(K, F, epochs, initialLearningRate, learningRateDecay, regularization, momentum, makePredictions):
+def main(K, F, epochs, initialLearningRate, learningRateDecay, regularization, momentum):
     # Initialise all our arrays
     W = rbm.getInitialWeights(trStats["n_movies"], F, K)
     grad = np.zeros(W.shape)
@@ -68,19 +69,12 @@ def main(K, F, epochs, initialLearningRate, learningRateDecay, regularization, m
     val_loss = [np.inf, np.inf]
 
     # store best weights
-    bestWeights = W
+    trained_weights = W
     # store best biases
-    best_hidden_bias = hidden_bias
-    best_visible_bias = visible_bias
+    trained_hidden_bias = hidden_bias
+    trained_visible_bias = visible_bias
 
     for epoch in range(1, epochs):
-        # # ! Keep training until training lost stops decreasing
-        # epoch = 0
-        # while True:
-        #     epoch += 1
-        #     if abs(train_loss[-1]-train_loss[-2]) < 0.0001 and epoch > 3:
-        #         break
-        # in each epoch, we'll visit all users in a random order
         visitingOrder = np.array(trStats["u_users"])
         np.random.shuffle(visitingOrder)
 
@@ -170,33 +164,27 @@ def main(K, F, epochs, initialLearningRate, learningRateDecay, regularization, m
         vlRMSE = lib.rmse(vlStats["ratings"], vl_r_hat)
         val_loss.append(vlRMSE)
 
-        # If Val loss is lower than what we have seen so far, update the best weights
-        if val_loss[-1] <= min(val_loss):
-            bestWeights = W
-            best_hidden_bias = hidden_bias
-            best_visible_bias = visible_bias
+        # If val loss is lower than what we have seen so far, update the weights and biases
+        if val_loss[-1] == min(val_loss):
+            trained_weights = W
+            trained_hidden_bias = hidden_bias
+            trained_visible_bias = visible_bias
 
         print("### EPOCH %d ###" % epoch)
         print("Training loss = %f" % trRMSE)
         print("Validation loss = %f" % vlRMSE)
-
-        # ! Print statement to track learning rate. Comment out for submission
         print("Learning Rate = %f" % rbm.getAdaptiveLearningRate(
             lr0=initialLearningRate, epoch=epoch, k=learningRateDecay))
         print("")
 
-    ### END ###
-    if makePredictions:
-        predictedRatings = np.array(
-            [rbm.predictForUserWithBias(user, bestWeights, best_hidden_bias, best_visible_bias, training) for user in trStats["u_users"]])
-        np.savetxt("predictions/predictedRatings_{}.txt".format(get_current_date()),
-                   predictedRatings)
-
-    return train_loss, val_loss
+    return train_loss, val_loss, trained_weights, trained_hidden_bias, trained_visible_bias
 
 
 # Only runs when mainRBM is called, not when imported
 if __name__ == "__main__":
     # * Function to train model
-    main(K, F, epochs, initialLearningRate,
-         learningRateDecay, regularization, momentum, True)
+    train_loss, val_loss, predictedRatings = main(K, F, epochs, initialLearningRate,
+                                                  learningRateDecay, regularization, momentum)
+    date, time = get_current_date_and_time()
+    np.savetxt("predictions/{}/{}_predictedRatings.txt".format(date, time),
+               predictedRatings)
