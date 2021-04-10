@@ -54,7 +54,7 @@ def update_plot_location(x, y, dimension):
 
 
 def hyperparameterTuning():
-    print("--- Commencing Hyper Parameter Tuning ---")
+    print("--- Commencing Hyper Parameter Tuning")
     start_time = datetime.now().replace(microsecond=0)
     # Initialise Variables
     results = []
