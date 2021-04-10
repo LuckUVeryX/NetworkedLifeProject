@@ -18,22 +18,22 @@ vlStats = lib.getUsefulStats(validation)
 # Ratings from 1-5
 K = 5
 
-epochs = 1
+epochs = 50
 
 # TODO Hyper parameter tuning
 # number of hidden units
 F = [15]
 
-initialLearningRate = [0.5, 0.1]
+initialLearningRate = [0.3, 0.1]
 
 # ? Range from 0.01 to 1
 learningRateDecay = [0.1, 0.5]
 
 # ? Range from 0 to 0.05
-regularization = [0.01, 0.05]
+regularization = [0.01, 0.05, 0.1]
 
 # ? 0 to 1
-momentum = [0.9, 0.99]
+momentum = [0.99]
 
 
 def get_plot_dimension():
@@ -69,7 +69,7 @@ def hyperparameterTuning():
     # ! Resize this if training with many different parameters
     # ? Might want to test with epochs = 1 to see if pdf will fit the plots
     fig, axs = plt.subplots(
-        plot_dimension, plot_dimension, sharex=True, sharey=True, figsize=(60, 20))
+        plot_dimension, plot_dimension, sharex=True, sharey=True, figsize=(40, 20))
 
     # Loop over the different parameters
     for a in range(len(F)):
@@ -78,7 +78,7 @@ def hyperparameterTuning():
                 for d in range(len(regularization)):
                     for e in range(len(momentum)):
 
-                        print("----------Training with F {}, initLearningRate {}, learningRateDecay {}, regularization {}, momentum {}----------".format(
+                        print("----------Training with F {}, initLearningRate {}, decay {}, regularization {}, momentum {}----------".format(
                             F[a], initialLearningRate[b], learningRateDecay[c], regularization[d], momentum[e]))
 
                         train_loss, val_loss = mainRBM.main(K=K,
@@ -93,7 +93,7 @@ def hyperparameterTuning():
                         results.append({"Validation Loss": min(val_loss),
                                         "F": F[a],
                                         "Init Learn Rate": initialLearningRate[b],
-                                        "Learn Rate Decay": learningRateDecay[c],
+                                        "Decay": learningRateDecay[c],
                                         "Regularization": regularization[d],
                                         "Momentum": momentum[e]
                                         })
