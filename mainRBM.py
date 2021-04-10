@@ -195,6 +195,8 @@ def main(K, F, epochs, initialLearningRate, learningRateDecay, regularization, m
     return train_loss, val_loss
 
 
-# * Function to train model
-# main(K, F, epochs, initialLearningRate,
-#      learningRateDecay, regularization, momentum, True)
+# Only runs when mainRBM is called, not when imported
+if __name__ == "__main__":
+    # * Function to train model
+    main(K, F, epochs, initialLearningRate,
+         learningRateDecay, regularization, momentum, True)
