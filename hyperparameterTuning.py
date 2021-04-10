@@ -87,7 +87,8 @@ def hyperparameterTuning():
                                                             initialLearningRate=initialLearningRate[b],
                                                             learningRateDecay=learningRateDecay[c],
                                                             regularization=regularization[d],
-                                                            momentum=momentum[e])
+                                                            momentum=momentum[e],
+                                                            makePredictions=False)
 
                         # Append results in the form of dictionary
                         results.append({"Validation Loss": min(val_loss),

@@ -1,7 +1,9 @@
+from hyperparameterTuning import hyperparameterTuning
 import numpy as np
 import rbm
 import projectLib as lib
 import matplotlib.pyplot as plt
+from datetime import datetime
 
 training = lib.getTrainingData()
 validation = lib.getValidationData()
@@ -38,7 +40,13 @@ regularization = 0.05
 momentum = 0.3
 
 
-def main(K, F, epochs, initialLearningRate, learningRateDecay, regularization, momentum):
+def get_current_date():
+    now = datetime.now()
+    date = now.strftime("%d%m%Y")
+    return date
+
+
+def main(K, F, epochs, initialLearningRate, learningRateDecay, regularization, momentum, makePredictions):
     # Initialise all our arrays
     W = rbm.getInitialWeights(trStats["n_movies"], F, K)
     grad = np.zeros(W.shape)
@@ -178,13 +186,16 @@ def main(K, F, epochs, initialLearningRate, learningRateDecay, regularization, m
             lr0=initialLearningRate, epoch=epoch, k=learningRateDecay))
         print("")
 
+    ### END ###
+    if makePredictions:
+        predictedRatings = np.array(
+            [rbm.predictForUserWithBias(user, bestWeights, best_hidden_bias, best_visible_bias, training) for user in trStats["u_users"]])
+        np.savetxt("predictions/predictedRatings_{}.txt".format(get_current_date()),
+                   predictedRatings)
+
     return train_loss, val_loss
 
-    ### END ###
-    # predictedRatings = np.array(
-    #     [rbm.predictForUserWithBias(user, bestWeights, best_hidden_bias, best_visible_bias, training) for user in trStats["u_users"]])
-    # np.savetxt("predictions/predictedRatings.txt", predictedRatings)
 
 # * Function to train model
-# main(K, F, epochs, initialLearningRate,
-#      learningRateDecay, regularization, momentum)
+main(K, F, epochs, initialLearningRate,
+     learningRateDecay, regularization, momentum, True)
