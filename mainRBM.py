@@ -18,7 +18,7 @@ K = 5
 # number of hidden units
 # TODO Hyper parameter tuning F, (number of hidden units)
 F = 15
-epochs = 200
+epochs = 2
 
 # * We are using adaptive learning rate instead of a fixed gradientLearningRate
 # //gradientLearningRate = 0.1
@@ -182,9 +182,21 @@ def main(K, F, epochs, initialLearningRate, learningRateDecay, regularization, m
 
 # Only runs when mainRBM is called, not when imported
 if __name__ == "__main__":
+    start_time = datetime.now().replace(microsecond=0)
+
     # * Function to train model
-    train_loss, val_loss, predictedRatings = main(K, F, epochs, initialLearningRate,
-                                                  learningRateDecay, regularization, momentum)
+    train_loss, val_loss, trained_weights, trained_hidden_bias, trained_visible_bias = main(K, F, epochs, initialLearningRate,
+                                                                                            learningRateDecay, regularization, momentum)
+    print("--- Predicting ratings...")
+    predicted_ratings = np.array(
+        [rbm.predictForUserWithBias(user, trained_weights, trained_hidden_bias, trained_visible_bias, training) for user in trStats["u_users"]])
+
     date, time = get_current_date_and_time()
+    print("--- Saving predictions")
     np.savetxt("predictions/{}/{}_predictedRatings.txt".format(date, time),
-               predictedRatings)
+               predicted_ratings)
+
+    end_time = datetime.now().replace(microsecond=0)
+    print("--- Finished training model")
+    print("--- Time Taken")
+    print("--- {}".format(end_time-start_time))

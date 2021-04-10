@@ -122,27 +122,28 @@ def hyperparameterTuning():
         os.makedirs('predictions/{}/'.format(date))
 
     # Output CSV
-    print('--- Writing to CSV ---')
+    print('--- Writing to CSV')
     df = pd.DataFrame(results)
     df = df.sort_values(by='Validation Loss', ascending=True)
     df.to_csv("predictions/{}/{}.csv".format(date, time))
 
     # Output best ratings
-    print("--- Predicting ratings... ---")
+    print("--- Predicting ratings...")
     bestPredictedRatings = np.array(
         [rbm.predictForUserWithBias(user, best_weights, best_hidden_bias, best_visible_bias, training) for user in trStats["u_users"]])
 
-    print("--- Saving predictions ---")
+    print("--- Saving predictions")
     np.savetxt("predictions/{}/{}_bestPredictedRatings.txt".format(date, time),
                bestPredictedRatings)
 
     # Output Plot
-    print("--- Plotting in progress ---")
+    print("--- Plotting in progress")
     for ax in axs.flat:
         ax.label_outer()
     line_labels = ["Training Loss", "Validation Loss"]
     fig.legend(labels=line_labels)
-    print("--- Saving plots... ---")
+
+    print("--- Saving plots...")
     plt.savefig("predictions/{}/{}.pdf".format(date, time))
 
     end_time = datetime.now().replace(microsecond=0)
