@@ -421,18 +421,18 @@ regularization_list = [0, 0.01, 0.02]
 # momentum_list = [0.5,0.99]
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
-## fix rest, vary regularization_list 
-# regularization_list with increment of 0.0001
+## fix rest, vary momentum 
+# momentum_list with increment of 0.0001
 momentum_list = parameters_list(0.0001,0.0005,0.0001)
-# regularization_list with increment of 0.001
+# momentum_list with increment of 0.001
 momentum_list.extend(parameters_list(0.001,0.005,0.001))
-# extend regularization_list with element of incerment 0.01
+# extend momentum_list with element of incerment 0.01
 momentum_list.extend(parameters_list(0.01,0.05,0.01))
-# extend regularization_list with element of incerment 0.1
+# extend momentum_list with element of incerment 0.1
 momentum_list.extend(parameters_list(0.1,0.5,0.1))
-# # extend regularization_list with element of incerment 1
+# # extend momentum_list with element of incerment 1
 momentum_list.extend(parameters_list(1,5,1))
-# # extend regularization_list with element of incerment 10
+# # extend momentum_list with element of incerment 10
 momentum_list.extend(parameters_list(10,50,10))
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
 
