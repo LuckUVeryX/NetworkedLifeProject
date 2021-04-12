@@ -1,5 +1,7 @@
 import numpy as np
 import projectLib as lib
+from datetime import datetime
+import os
 
 # shape is movie,user,rating
 training = lib.getTrainingData()
@@ -31,7 +33,7 @@ def getc(rBar, ratings):
 # apply the functions
 A = getA(training)
 c = getc(rBar, trStats["ratings"])
-
+l = 1
 # compute the estimator b
 
 
@@ -58,16 +60,20 @@ def param_reg(A, c, l):
 
 
 def predict(movies, users, rBar, b):
-    n_predict = len(users)
-    p = np.zeros(n_predict)
-    for i in range(0, n_predict):
-        rating = rBar + b[movies[i]] + b[trStats["n_movies"] + users[i]]
-        if rating > 5:
-            rating = 5.0
-        if rating < 1:
-            rating = 1.0
-        p[i] = rating
-    return p
+    try:
+        n_predict = len(users)
+        p = np.zeros(n_predict)
+        for i in range(0, n_predict):
+            rating = rBar + b[movies[i]] + b[trStats["n_movies"] + users[i]]
+            if rating > 5:
+                rating = 5.0
+            if rating < 1:
+                rating = 1.0
+            p[i] = rating
+        return p
+    except: 
+        p = 'error'
+        return (p)
 
 
 # Unregularised version (<=> regularised version with l = 0)
@@ -75,11 +81,51 @@ def predict(movies, users, rBar, b):
 
 
 # Regularised version
-l = 1
-b = param_reg(A, c, l)
+def linearmodel(A,c,l):
+    b = param_reg(A, c, l)
+    print("Linear regression, l = %f" % l)
+    predicted_training = predict(trStats["movies"], trStats["users"], rBar, b)
+    actual_training = trStats["ratings"]
+    train_loss = lib.rmse(predicted_training, actual_training)
+    print("RMSE for training %f" % train_loss)
 
-print("Linear regression, l = %f" % l)
-print("RMSE for training %f" % lib.rmse(
-    predict(trStats["movies"], trStats["users"], rBar, b), trStats["ratings"]))
-print("RMSE for validation %f" % lib.rmse(
-    predict(vlStats["movies"], vlStats["users"], rBar, b), vlStats["ratings"]))
+    predicted_val = predict(vlStats["movies"], vlStats["users"], rBar, b)
+    actual_val = vlStats["ratings"]
+    val_loss = lib.rmse(predicted_val ,actual_val)
+    print("RMSE for validation %f" % val_loss)
+    return(b,l,train_loss, val_loss,)
+
+def get_current_date_and_time():
+    now = datetime.now()
+    date = now.strftime("%d%m%Y")
+    time = now.strftime("%H%M")
+    return date, time
+
+def createfolder(foldername):
+    foldername = str(foldername)
+    if not os.path.exists(foldername):
+        os.makedirs(foldername)
+
+# Only runs when linearRefression is called, not when imported
+if __name__ == "__main__":
+    start_time = datetime.now().replace(microsecond=0)
+
+
+    # * Function to train model
+    b,l,train_loss, val_loss = linearmodel(A,c,l)
+    print("--- Predicting ratings...")
+    predicted_ratings = np.array(
+        [predict(trStats["movies"], trStats["u_users"] , rBar, b)])
+
+    date, time = get_current_date_and_time()
+    print("--- Saving predictions")
+    # check and create folder
+    createfolder('predictions')
+    createfolder('predictions/' + str(date))
+    np.savetxt("predictions/{}/{}_predictedRatings.txt".format(date, time),
+               predicted_ratings,fmt='%s')
+
+    end_time = datetime.now().replace(microsecond=0)
+    print("--- Finished training model")
+    print("--- Time Taken")
+    print("--- {}".format(end_time-start_time))
