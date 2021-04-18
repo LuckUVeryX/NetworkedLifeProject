@@ -60,8 +60,7 @@ def main(K, F, epochs, initialLearningRate, learningRateDecay, regularization, m
     # imagine bias as additional hidden and visible unit
     # bias is a term to be added for each visible unit, for each hidden unit, and there are 5 ratings
     # Ref: Salakhutdinov et al. research paper
-    hidden_bias = rbm.getInitialHiddenBias(
-        F)  # b_j is bias of hidden feature j
+    hidden_bias = rbm.getInitialHiddenBias(F)  # b_j is bias of hidden feature j
     hidden_bias_grad = np.zeros(hidden_bias.shape)
 
     # b_ik is the bias of rating k for movie i
@@ -105,22 +104,18 @@ def main(K, F, epochs, initialLearningRate, learningRateDecay, regularization, m
 
                 ### LEARNING ###
                 # propagate visible input to hidden units
-                posHiddenProb = rbm.visibleToHiddenVecBias(
-                    v, weightsForUser, hidden_bias)
+                posHiddenProb = rbm.visibleToHiddenVecBias(v, weightsForUser, hidden_bias)
                 # get positive gradient
                 # note that we only update the movies that this user has seen!
-                posprods[ratingsForUser[:, 0], :,
-                         :] = rbm.probProduct(v, posHiddenProb)
+                posprods[ratingsForUser[:, 0], :, :] = rbm.probProduct(v, posHiddenProb)
 
                 ### UNLEARNING ###
                 # sample from hidden distribution
                 sampledHidden = rbm.sample(posHiddenProb)
                 # propagate back to get "negative data"
-                negData = rbm.hiddenToVisibleBias(
-                    sampledHidden, weightsForUser, visible_biasForUser)
+                negData = rbm.hiddenToVisibleBias(sampledHidden, weightsForUser, visible_biasForUser)
                 # propagate negative data to hidden units
-                negHiddenProb = rbm.visibleToHiddenVecBias(
-                    negData, weightsForUser, hidden_bias)
+                negHiddenProb = rbm.visibleToHiddenVecBias(negData, weightsForUser, hidden_bias)
                 # get negative gradient
                 # note that we only update the movies that this user has seen!
                 negprods[ratingsForUser[:, 0], :, :] = rbm.probProduct(
