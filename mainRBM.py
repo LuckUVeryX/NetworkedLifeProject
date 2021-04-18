@@ -18,12 +18,12 @@ K = 5
 # number of hidden units
 # TODO Hyper parameter tuning F, (number of hidden units)
 F = 15
-epochs = 100
+epochs = 150
 
 # * We are using adaptive learning rate instead of a fixed gradientLearningRate
 # //gradientLearningRate = 0.1
 # * Use this to select ideal learning rate at epoch 1
-initialLearningRate = 1
+initialLearningRate = 0.5
 #  TODO Hyper parameter tuning
 # ? Range from 1 to 5
 learningRateDecay = 0.1
@@ -36,12 +36,12 @@ regularization = 0.05
 # * Momentum
 # TODO Hyper parameter tuning
 # ? 0 to 1
-momentum = 0.1
+momentum = 0.4
 
 # * Mini-Batch
 # TODO Hyper parameter tuning
 # ? 0 to 40 (in multiples of 5)
-batch_number = 35
+batch_number = 30
 
 def get_current_date_and_time():
     now = datetime.now()
@@ -81,14 +81,18 @@ def main(K, F, epochs, initialLearningRate, learningRateDecay, regularization, m
     for epoch in range(1, epochs):
         visitingOrder = np.array(trStats["u_users"])
         np.random.shuffle(visitingOrder)
-        batches = np.array_split(visitingOrder, batch_number)
+        batches = np.array_split(visitingOrder, batch_size)
 
         for batch in batches:
             # keep track previous gradient for weights
             last_grad = grad
+            grad = np.zeros(W.shape)
+
             # keep track of previous gradient for biases
             last_hidden_bias_grad = hidden_bias_grad
             last_visible_bias_grad = visible_bias_grad
+            visible_bias_grad = np.zeros(visible_bias.shape)
+            hidden_bias_grad = np.zeros(hidden_bias.shape)
 
             for user in batch:
                 # get the ratings of that user
@@ -127,35 +131,34 @@ def main(K, F, epochs, initialLearningRate, learningRateDecay, regularization, m
 
                 # we average over the number of users in the batch 
                 # implement L2 regularization; reference: https://sudonull.com/post/128613-Regularization-in-a-restricted-Boltzmann-machine-experiment
-                grad[ratingsForUser[:, 0], :, :] = (rbm.getAdaptiveLearningRate(lr0=initialLearningRate, epoch=epoch, k=learningRateDecay) * \
+                grad[ratingsForUser[:, 0], :, :] += (rbm.getAdaptiveLearningRate(lr0=initialLearningRate, epoch=epoch, k=learningRateDecay) * \
                     (posprods[ratingsForUser[:, 0], :, :] -
                     negprods[ratingsForUser[:, 0], :, :] -
-                    regularization * W[ratingsForUser[:, 0], :, :]))
+                    regularization * W[ratingsForUser[:, 0], :, :]))/len(batch)
 
                 # calculate the gradient wrt biases
                 # refer to update rule for biases: https://stats.stackexchange.com/questions/139138/updating-bias-with-rbms-restricted-boltzmann-machines
                 # gradient for hidden bias
-                hidden_bias_grad = (rbm.getAdaptiveLearningRate(lr0=initialLearningRate, epoch=epoch, k=learningRateDecay) * \
+                hidden_bias_grad += (rbm.getAdaptiveLearningRate(lr0=initialLearningRate, epoch=epoch, k=learningRateDecay) * \
                     (posHiddenProb -
                     negHiddenProb -
                     regularization * hidden_bias))/len(batch)
-                # give some inertia to gradient updates
-                hidden_bias += (1-momentum) * hidden_bias_grad + \
-                    momentum * last_hidden_bias_grad
 
                 # gradient for visible bias
-                visible_bias_grad[ratingsForUser[:, 0], :] = (rbm.getAdaptiveLearningRate(lr0=initialLearningRate, epoch=epoch, k=learningRateDecay) * \
+                visible_bias_grad[ratingsForUser[:, 0], :] += (rbm.getAdaptiveLearningRate(lr0=initialLearningRate, epoch=epoch, k=learningRateDecay) * \
                     (v -
                     negData -
                     regularization * visible_bias[ratingsForUser[:, 0], :]))/len(batch)
-                # give some inertia to gradient updates
-                visible_bias[ratingsForUser[:, 0], :] += (1-momentum) * visible_bias_grad[ratingsForUser[:, 0], :] + \
-                    momentum * last_visible_bias_grad[ratingsForUser[:, 0], :]
 
-            grad = grad/len(batch)
             # give some inertia to the gradient updates, limiting the risk that your gradient starts oscillating
             W[ratingsForUser[:, 0], :, :] += (1-momentum) * grad[ratingsForUser[:, 0], :, :] + \
                 momentum * last_grad[ratingsForUser[:, 0], :, :]
+
+            hidden_bias += (1-momentum) * hidden_bias_grad + \
+                    momentum * last_hidden_bias_grad
+
+            visible_bias[ratingsForUser[:, 0], :] += (1-momentum) * visible_bias_grad[ratingsForUser[:, 0], :] + \
+                    momentum * last_visible_bias_grad[ratingsForUser[:, 0], :]
 
         # Print the current RMSE for training and validation sets
         # this allows you to control for overfitting e.g
