@@ -43,6 +43,7 @@ momentum = 0.1
 # ? 0 to 40 (in multiples of 5)
 batch_number = 35
 
+
 def get_current_date_and_time():
     now = datetime.now()
     date = now.strftime("%d%m%Y")
@@ -109,7 +110,7 @@ def main(K, F, epochs, initialLearningRate, learningRateDecay, regularization, m
                 # get positive gradient
                 # note that we only update the movies that this user has seen!
                 posprods[ratingsForUser[:, 0], :,
-                        :] = rbm.probProduct(v, posHiddenProb)
+                         :] = rbm.probProduct(v, posHiddenProb)
 
                 ### UNLEARNING ###
                 # sample from hidden distribution
@@ -125,49 +126,38 @@ def main(K, F, epochs, initialLearningRate, learningRateDecay, regularization, m
                 negprods[ratingsForUser[:, 0], :, :] = rbm.probProduct(
                     negData, negHiddenProb)
 
-                # we average over the number of users in the batch 
+                # we average over the number of users in the batch
                 # implement L2 regularization; reference: https://sudonull.com/post/128613-Regularization-in-a-restricted-Boltzmann-machine-experiment
-                grad[ratingsForUser[:, 0], :, :] = (rbm.getAdaptiveLearningRate(lr0=initialLearningRate, epoch=epoch, k=learningRateDecay) * \
-                    (posprods[ratingsForUser[:, 0], :, :] -
-                    negprods[ratingsForUser[:, 0], :, :] -
-                    regularization * W[ratingsForUser[:, 0], :, :]))
+                grad[ratingsForUser[:, 0], :, :] = (rbm.getAdaptiveLearningRate(lr0=initialLearningRate, epoch=epoch, k=learningRateDecay) *
+                                                    (posprods[ratingsForUser[:, 0], :, :] - negprods[ratingsForUser[:, 0], :, :] - regularization * W[ratingsForUser[:, 0], :, :]))
 
                 # calculate the gradient wrt biases
                 # refer to update rule for biases: https://stats.stackexchange.com/questions/139138/updating-bias-with-rbms-restricted-boltzmann-machines
                 # gradient for hidden bias
-                hidden_bias_grad = (rbm.getAdaptiveLearningRate(lr0=initialLearningRate, epoch=epoch, k=learningRateDecay) * \
-                    (posHiddenProb -
-                    negHiddenProb -
-                    regularization * hidden_bias))/len(batch)
+                hidden_bias_grad = (rbm.getAdaptiveLearningRate(lr0=initialLearningRate, epoch=epoch, k=learningRateDecay)
+                                    * (posHiddenProb - negHiddenProb - regularization * hidden_bias)) / len(batch)
                 # give some inertia to gradient updates
-                hidden_bias += (1-momentum) * hidden_bias_grad + \
-                    momentum * last_hidden_bias_grad
+                hidden_bias += (1-momentum) * hidden_bias_grad + momentum * last_hidden_bias_grad
 
                 # gradient for visible bias
-                visible_bias_grad[ratingsForUser[:, 0], :] = (rbm.getAdaptiveLearningRate(lr0=initialLearningRate, epoch=epoch, k=learningRateDecay) * \
-                    (v -
-                    negData -
-                    regularization * visible_bias[ratingsForUser[:, 0], :]))/len(batch)
+                visible_bias_grad[ratingsForUser[:, 0], :] = (rbm.getAdaptiveLearningRate(lr0=initialLearningRate, epoch=epoch, k=learningRateDecay)
+                                                              * (v - negData - regularization * visible_bias[ratingsForUser[:, 0], :])) / len(batch)
                 # give some inertia to gradient updates
-                visible_bias[ratingsForUser[:, 0], :] += (1-momentum) * visible_bias_grad[ratingsForUser[:, 0], :] + \
-                    momentum * last_visible_bias_grad[ratingsForUser[:, 0], :]
+                visible_bias[ratingsForUser[:, 0], :] += (1-momentum) * visible_bias_grad[ratingsForUser[:, 0], :] + momentum * last_visible_bias_grad[ratingsForUser[:, 0], :]
 
-            grad = grad/len(batch)
+            grad = grad / len(batch)
             # give some inertia to the gradient updates, limiting the risk that your gradient starts oscillating
-            W[ratingsForUser[:, 0], :, :] += (1-momentum) * grad[ratingsForUser[:, 0], :, :] + \
-                momentum * last_grad[ratingsForUser[:, 0], :, :]
+            W[ratingsForUser[:, 0], :, :] += (1-momentum) * grad[ratingsForUser[:, 0], :, :] + momentum * last_grad[ratingsForUser[:, 0], :, :]
 
         # Print the current RMSE for training and validation sets
         # this allows you to control for overfitting e.g
         # We predict over the training set
-        tr_r_hat = rbm.predictWithBias(
-            trStats["movies"], trStats["users"], W, hidden_bias, visible_bias, training)
+        tr_r_hat = rbm.predictWithBias(trStats["movies"], trStats["users"], W, hidden_bias, visible_bias, training)
         trRMSE = lib.rmse(trStats["ratings"], tr_r_hat)
         train_loss.append(trRMSE)
 
         # We predict over the validation set
-        vl_r_hat = rbm.predictWithBias(
-            vlStats["movies"], vlStats["users"], W, hidden_bias, visible_bias, training)
+        vl_r_hat = rbm.predictWithBias(vlStats["movies"], vlStats["users"], W, hidden_bias, visible_bias, training)
         vlRMSE = lib.rmse(vlStats["ratings"], vl_r_hat)
         val_loss.append(vlRMSE)
 
@@ -180,8 +170,7 @@ def main(K, F, epochs, initialLearningRate, learningRateDecay, regularization, m
         print("--- EPOCH %d" % epoch)
         print("Training loss = %f" % trRMSE)
         print("Validation loss = %f" % vlRMSE)
-        print("Learning Rate = %f" % rbm.getAdaptiveLearningRate(
-            lr0=initialLearningRate, epoch=epoch, k=learningRateDecay))
+        print("Learning Rate = %f" % rbm.getAdaptiveLearningRate(lr0=initialLearningRate, epoch=epoch, k=learningRateDecay))
         print("")
 
     return train_loss, val_loss, trained_weights, trained_hidden_bias, trained_visible_bias
@@ -192,10 +181,9 @@ if __name__ == "__main__":
     start_time = datetime.now().replace(microsecond=0)
 
     # * Function to train model
-    train_loss, val_loss, trained_weights, trained_hidden_bias, trained_visible_bias = main(K, F, epochs, initialLearningRate,
-                                                                                            learningRateDecay, regularization, momentum, batch_number)
+    train_loss, val_loss, trained_weights, trained_hidden_bias, trained_visible_bias = main(K, F, epochs, initialLearningRate, learningRateDecay, regularization, momentum, batch_number)
     print("--- Predicting ratings...")
-    #predicted_ratings = np.array(
+    # predicted_ratings = np.array(
     #    [rbm.predictForUserWithBias(user, trained_weights, trained_hidden_bias, trained_visible_bias, training) for user in trStats["u_users"]])
 
     date, time = get_current_date_and_time()
