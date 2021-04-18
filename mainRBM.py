@@ -18,12 +18,12 @@ K = 5
 # number of hidden units
 # TODO Hyper parameter tuning F, (number of hidden units)
 F = 15
-epochs = 2
+epochs = 100
 
 # * We are using adaptive learning rate instead of a fixed gradientLearningRate
 # //gradientLearningRate = 0.1
 # * Use this to select ideal learning rate at epoch 1
-initialLearningRate = 3.0
+initialLearningRate = 1
 #  TODO Hyper parameter tuning
 # ? Range from 1 to 5
 learningRateDecay = 0.1
@@ -33,11 +33,15 @@ learningRateDecay = 0.1
 # ? Range from 0 to 0.05
 regularization = 0.05
 
-# * Momemntum
+# * Momentum
 # TODO Hyper parameter tuning
 # ? 0 to 1
-momentum = 0.3
+momentum = 0.2
 
+# * Mini-Batch
+# TODO Hyper parameter tuning
+# ? 0 to 40 (in multiples of 5)
+batch_number = 25
 
 def get_current_date_and_time():
     now = datetime.now()
@@ -46,7 +50,7 @@ def get_current_date_and_time():
     return date, time
 
 
-def main(K, F, epochs, initialLearningRate, learningRateDecay, regularization, momentum):
+def main(K, F, epochs, initialLearningRate, learningRateDecay, regularization, momentum, batch_size):
     # Initialise all our arrays
     W = rbm.getInitialWeights(trStats["n_movies"], F, K)
     grad = np.zeros(W.shape)
@@ -77,58 +81,60 @@ def main(K, F, epochs, initialLearningRate, learningRateDecay, regularization, m
     for epoch in range(1, epochs):
         visitingOrder = np.array(trStats["u_users"])
         np.random.shuffle(visitingOrder)
+        batches = np.array_split(visitingOrder, batch_number)
 
-        # keep track previous gradient for weights
-        last_grad = grad
-        # keep track of previous gradient for biases
-        last_hidden_bias_grad = hidden_bias_grad
-        last_visible_bias_grad = visible_bias_grad
+        for batch in batches:
+            # keep track previous gradient for weights
+            last_grad = grad
+            # keep track of previous gradient for biases
+            last_hidden_bias_grad = hidden_bias_grad
+            last_visible_bias_grad = visible_bias_grad
 
-        for user in visitingOrder:
-            # get the ratings of that user
-            ratingsForUser = lib.getRatingsForUser(user, training)
+            for user in batch:
+                # get the ratings of that user
+                ratingsForUser = lib.getRatingsForUser(user, training)
 
-            # build the visible input
-            v = rbm.getV(ratingsForUser)
+                # build the visible input
+                v = rbm.getV(ratingsForUser)
 
-            # get the weights associated to movies the user has seen
-            weightsForUser = W[ratingsForUser[:, 0], :, :]
-            # get the visible bias associated to movies the user has seen
-            visible_biasForUser = visible_bias[ratingsForUser[:, 0], :]
+                # get the weights associated to movies the user has seen
+                weightsForUser = W[ratingsForUser[:, 0], :, :]
+                # get the visible bias associated to movies the user has seen
+                visible_biasForUser = visible_bias[ratingsForUser[:, 0], :]
 
-            ### LEARNING ###
-            # propagate visible input to hidden units
-            posHiddenProb = rbm.visibleToHiddenVecBias(
-                v, weightsForUser, hidden_bias)
-            # get positive gradient
-            # note that we only update the movies that this user has seen!
-            posprods[ratingsForUser[:, 0], :,
-                     :] = rbm.probProduct(v, posHiddenProb)
+                ### LEARNING ###
+                # propagate visible input to hidden units
+                posHiddenProb = rbm.visibleToHiddenVecBias(
+                    v, weightsForUser, hidden_bias)
+                # get positive gradient
+                # note that we only update the movies that this user has seen!
+                posprods[ratingsForUser[:, 0], :,
+                        :] = rbm.probProduct(v, posHiddenProb)
 
-            ### UNLEARNING ###
-            # sample from hidden distribution
-            sampledHidden = rbm.sample(posHiddenProb)
-            # propagate back to get "negative data"
-            negData = rbm.hiddenToVisibleBias(
-                sampledHidden, weightsForUser, visible_biasForUser)
-            # propagate negative data to hidden units
-            negHiddenProb = rbm.visibleToHiddenVecBias(
-                negData, weightsForUser, hidden_bias)
-            # get negative gradient
-            # note that we only update the movies that this user has seen!
-            negprods[ratingsForUser[:, 0], :, :] = rbm.probProduct(
-                negData, negHiddenProb)
+                ### UNLEARNING ###
+                # sample from hidden distribution
+                sampledHidden = rbm.sample(posHiddenProb)
+                # propagate back to get "negative data"
+                negData = rbm.hiddenToVisibleBias(
+                    sampledHidden, weightsForUser, visible_biasForUser)
+                # propagate negative data to hidden units
+                negHiddenProb = rbm.visibleToHiddenVecBias(
+                    negData, weightsForUser, hidden_bias)
+                # get negative gradient
+                # note that we only update the movies that this user has seen!
+                negprods[ratingsForUser[:, 0], :, :] = rbm.probProduct(
+                    negData, negHiddenProb)
 
-            # we average over the number of users in the batch (if we use mini-batch)
-            # implement L2 regularization; reference: https://sudonull.com/post/128613-Regularization-in-a-restricted-Boltzmann-machine-experiment
-            grad[ratingsForUser[:, 0], :, :] = rbm.getAdaptiveLearningRate(lr0=initialLearningRate, epoch=epoch, k=learningRateDecay) * \
-                (posprods[ratingsForUser[:, 0], :, :] -
-                 negprods[ratingsForUser[:, 0], :, :] -
-                 regularization * W[ratingsForUser[:, 0], :, :])
+                # we average over the number of users in the batch 
+                # implement L2 regularization; reference: https://sudonull.com/post/128613-Regularization-in-a-restricted-Boltzmann-machine-experiment
+                grad[ratingsForUser[:, 0], :, :] = (rbm.getAdaptiveLearningRate(lr0=initialLearningRate, epoch=epoch, k=learningRateDecay) * \
+                    (posprods[ratingsForUser[:, 0], :, :] -
+                    negprods[ratingsForUser[:, 0], :, :] -
+                    regularization * W[ratingsForUser[:, 0], :, :]))/len(batch)
 
-            # give some inertia to the gradient updates, limiting the risk that your gradient starts oscillating
-            W[ratingsForUser[:, 0], :, :] += (1-momentum) * grad[ratingsForUser[:, 0], :, :] + \
-                momentum * last_grad[ratingsForUser[:, 0], :, :]
+                # give some inertia to the gradient updates, limiting the risk that your gradient starts oscillating
+                W[ratingsForUser[:, 0], :, :] += (1-momentum) * grad[ratingsForUser[:, 0], :, :] + \
+                    momentum * last_grad[ratingsForUser[:, 0], :, :]
 
             # calculate the gradient wrt biases
             # refer to update rule for biases: https://stats.stackexchange.com/questions/139138/updating-bias-with-rbms-restricted-boltzmann-machines
@@ -186,15 +192,14 @@ if __name__ == "__main__":
 
     # * Function to train model
     train_loss, val_loss, trained_weights, trained_hidden_bias, trained_visible_bias = main(K, F, epochs, initialLearningRate,
-                                                                                            learningRateDecay, regularization, momentum)
+                                                                                            learningRateDecay, regularization, momentum, batch_number)
     print("--- Predicting ratings...")
-    predicted_ratings = np.array(
-        [rbm.predictForUserWithBias(user, trained_weights, trained_hidden_bias, trained_visible_bias, training) for user in trStats["u_users"]])
+    #predicted_ratings = np.array(
+    #    [rbm.predictForUserWithBias(user, trained_weights, trained_hidden_bias, trained_visible_bias, training) for user in trStats["u_users"]])
 
     date, time = get_current_date_and_time()
     print("--- Saving predictions")
-    np.savetxt("predictions/{}/{}_predictedRatings.txt".format(date, time),
-               predicted_ratings)
+    #np.savetxt("predictions/{}/{}_predictedRatings.txt".format(date, time), predicted_ratings)
 
     end_time = datetime.now().replace(microsecond=0)
     print("--- Finished training model")
