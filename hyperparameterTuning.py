@@ -37,14 +37,12 @@ regularization = [0.05, 0.1]
 momentum = [0.9, 0.99]
 
 
-def get_plot_dimension():
-    num_plots = len(F) * len(initialLearningRate) * \
-        len(learningRateDecay) * len(regularization) * len(momentum)
-
+def getPlotDimension():
+    num_plots = len(F) * len(initialLearningRate) * len(learningRateDecay) * len(regularization) * len(momentum)
     return int(np.ceil(np.sqrt(num_plots)))
 
 
-def update_plot_location(x, y, dimension):
+def updatePlotLocation(x, y, dimension):
     if x < dimension - 1:
         x += 1
     else:
@@ -55,19 +53,18 @@ def update_plot_location(x, y, dimension):
 
 def hyperparameterTuning():
     print("--- Commencing Hyper Parameter Tuning")
-    start_time = datetime.now().replace(microsecond=0)
+    startTime = datetime.now().replace(microsecond=0)
     # Initialise Variables
     results = []
-    best_val_loss = np.inf
+    bestValLoss = np.inf
 
     x = 0
     y = 0
 
-    plot_dimension = get_plot_dimension()
+    plotDimension = getPlotDimension()
     # ! Resize this if training with many different parameters
     # ? Might want to test with epochs = 1 to see if pdf will fit the plots
-    fig, axs = plt.subplots(
-        plot_dimension, plot_dimension, sharex=True, sharey=True, figsize=(40, 20))
+    fig, axs = plt.subplots(plotDimension, plotDimension, sharex=True, sharey=True, figsize=(40, 20))
 
     # Loop over the different parameters
     for a in range(len(F)):
@@ -79,19 +76,19 @@ def hyperparameterTuning():
                         print("--- Training with F {}, initLearningRate {}, decay {}, regularization {}, momentum {}".format(
                             F[a], initialLearningRate[b], learningRateDecay[c], regularization[d], momentum[e]))
 
-                        train_loss, val_loss, trained_weights, trained_hidden_bias, trained_visible_bias = mainRBM.main(K=K,
-                                                                                                                        epochs=epochs,
-                                                                                                                        F=F[a],
-                                                                                                                        initialLearningRate=initialLearningRate[
-                                                                                                                            b],
-                                                                                                                        learningRateDecay=learningRateDecay[
-                                                                                                                            c],
-                                                                                                                        regularization=regularization[
-                                                                                                                            d],
-                                                                                                                        momentum=momentum[e])
+                        trainLoss, valLoss, trainedWeights, trainedHiddenBias, trainedVisibleBias = mainRBM.main(K=K,
+                                                                                                                 epochs=epochs,
+                                                                                                                 F=F[a],
+                                                                                                                 initialLearningRate=initialLearningRate[
+                                                                                                                     b],
+                                                                                                                 learningRateDecay=learningRateDecay[
+                                                                                                                     c],
+                                                                                                                 regularization=regularization[
+                                                                                                                     d],
+                                                                                                                 momentum=momentum[e])
 
                         # Append results in the form of dictionary
-                        results.append({"Validation Loss": min(val_loss),
+                        results.append({"Validation Loss": min(valLoss),
                                         "F": F[a],
                                         "Init Learn Rate": initialLearningRate[b],
                                         "Decay": learningRateDecay[c],
@@ -100,24 +97,24 @@ def hyperparameterTuning():
                                         })
 
                         # Save the weights and biases of the best model
-                        if min(val_loss) < best_val_loss:
-                            best_val_loss = min(val_loss)
-                            best_weights = trained_weights
-                            best_hidden_bias = trained_hidden_bias
-                            best_visible_bias = trained_visible_bias
+                        if min(valLoss) < bestValLoss:
+                            bestValLoss = min(valLoss)
+                            bestWeights = trainedWeights
+                            bestHiddenBias = trainedHiddenBias
+                            bestVisibleBias = trainedVisibleBias
 
                         # Plot the evolution of training and validation RMSE
-                        axs[x, y].plot(train_loss)
-                        axs[x, y].plot(val_loss)
+                        axs[x, y].plot(trainLoss)
+                        axs[x, y].plot(valLoss)
                         axs[x, y].set(xlabel='epoch', ylabel='RMSE')
                         axs[x, y].set_title('F {}, LR {}, Decay {}, Reg {}, Mmt {}'.format(
                             F[a], initialLearningRate[b], learningRateDecay[c], regularization[d], momentum[e]))
 
                         # Update the index to plot plots
-                        x, y = update_plot_location(x, y, plot_dimension)
+                        x, y = updatePlotLocation(x, y, plotDimension)
 
     # Code to output predictions without overwriting by using current date time
-    date, time = mainRBM.get_current_date_and_time()
+    date, time = mainRBM.getCurrentDateAndTime()
     if not os.path.exists('predictions/{}/'.format(date)):
         os.makedirs('predictions/{}/'.format(date))
 
@@ -130,26 +127,25 @@ def hyperparameterTuning():
     # Output best ratings
     print("--- Predicting ratings...")
     bestPredictedRatings = np.array(
-        [rbm.predictForUserWithBias(user, best_weights, best_hidden_bias, best_visible_bias, training) for user in trStats["u_users"]])
+        [rbm.predictForUserWithBias(user, bestWeights, bestHiddenBias, bestVisibleBias, training) for user in trStats["u_users"]])
 
     print("--- Saving predictions")
-    np.savetxt("predictions/{}/{}_bestPredictedRatings.txt".format(date, time),
-               bestPredictedRatings)
+    np.savetxt("predictions/{}/{}_bestPredictedRatings.txt".format(date, time), bestPredictedRatings)
 
     # Output Plot
     print("--- Plotting in progress")
     for ax in axs.flat:
         ax.label_outer()
-    line_labels = ["Training Loss", "Validation Loss"]
-    fig.legend(labels=line_labels)
+    lineLabels = ["Training Loss", "Validation Loss"]
+    fig.legend(labels=lineLabels)
 
     print("--- Saving plots...")
     plt.savefig("predictions/{}/{}.pdf".format(date, time))
 
-    end_time = datetime.now().replace(microsecond=0)
+    endTime = datetime.now().replace(microsecond=0)
     print("--- Finished hyperparameter tuning ---")
     print("--- Time Taken ---")
-    print("--- {} ---".format(end_time-start_time))
+    print("--- {} ---".format(endTime-startTime))
 
     plt.show()
 
