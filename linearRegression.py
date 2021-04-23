@@ -16,9 +16,12 @@ rBar = np.mean(trStats["ratings"])
 def getA(training):
     A = np.zeros(
         (trStats["n_ratings"], trStats["n_movies"] + trStats["n_users"]))
+    # have every linear combination between movie ID and user ID based on the n_rating
     for i in range(trStats["n_ratings"]):
         A[i][training[i][0]] = 1  # movie ID
-        A[i][training[i][1]] = 1  # user ID
+        # since the 1st 97 index refers to trStats["n_movies"]
+        # hence add 97(n_movies) + n_rating for every possible combination
+        A[i][trStats["n_movies"] + training[i][1]] = 1  # user ID
     return A
 
 # we also get c
