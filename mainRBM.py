@@ -3,6 +3,9 @@ import rbm
 import projectLib as lib
 import matplotlib.pyplot as plt
 from datetime import datetime
+# set seed here to fix the random shuffle
+import random
+
 
 training = lib.getTrainingData()
 validation = lib.getValidationData()
@@ -76,6 +79,8 @@ def main(K, F, epochs, initialLearningRate, learningRateDecay, regularization, m
 
     for epoch in range(1, epochs):
         visitingOrder = np.array(trStats["u_users"])
+        # set seed to ensure same VisitingOrder
+        random.seed(10)
         np.random.shuffle(visitingOrder)
 
         # keep track previous gradient for weights

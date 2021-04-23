@@ -6,6 +6,8 @@ import pandas as pd
 import numpy as np
 import os
 from datetime import datetime
+import random
+
 
 training = lib.getTrainingData()
 validation = lib.getValidationData()
@@ -23,18 +25,24 @@ epochs = 80
 
 # TODO Hyper parameter tuning
 # number of hidden units
-F = [15, 50]
+# F = [15, 50]
+F = random.sample(range(1, 100), 5)
 
-initialLearningRate = [0.3, 0.1]
+
+# initialLearningRate = [0.3, 0.1]
+initialLearningRate = np.random.uniform(low=0.1, high=100, size=(5,))
 
 # ? Range from 0.01 to 1
-learningRateDecay = [0.3, 0.1]
+# learningRateDecay = [0.3, 0.1]
+learningRateDecay = np.random.uniform(low=0.001, high=10, size=(5,))
 
 # ? Range from 0 to 0.05
-regularization = [0.05, 0.1]
+# regularization = [0.05, 0.1]
+regularization = np.random.uniform(low=0.00001, high=0.01, size=(5,))
 
 # ? 0 to 1
-momentum = [0.9, 0.99]
+# momentum = [0.9, 0.99]
+momentum = np.random.uniform(low=0.00001, high=0.99, size=(5,))
 
 
 def get_plot_dimension():
@@ -68,6 +76,16 @@ def hyperparameterTuning():
     # ? Might want to test with epochs = 1 to see if pdf will fit the plots
     fig, axs = plt.subplots(
         plot_dimension, plot_dimension, sharex=True, sharey=True, figsize=(40, 20))
+
+    # Code to output predictions without overwriting by using current date time
+    date, time = mainRBM.get_current_date_and_time()
+    if not os.path.exists('predictions/{}/script_progress'.format(date)):
+        os.makedirs('predictions/{}/script_progress'.format(date))
+    # Variable to track current progress of the script
+    inprogress = 0
+    iterations = len(F)*len(initialLearningRate)*len(learningRateDecay)*len(regularization)*len(momentum)
+    txtfilename = 'predictions/{}/script_progress/'.format(date) + str(time) + '_runtime.txt'
+    f= open(txtfilename,"w+")
 
     # Loop over the different parameters
     for a in range(len(F)):
@@ -116,10 +134,18 @@ def hyperparameterTuning():
                         # Update the index to plot plots
                         x, y = update_plot_location(x, y, plot_dimension)
 
-    # Code to output predictions without overwriting by using current date time
-    date, time = mainRBM.get_current_date_and_time()
-    if not os.path.exists('predictions/{}/'.format(date)):
-        os.makedirs('predictions/{}/'.format(date))
+                        #update inprogress for every iteration
+                        inprogress = inprogress + 1
+
+                        #save in .txt of amt currently done
+                        amt_done = round((inprogress/iterations),2)
+                        f.write("This is line %d\r\n" % (amt_done))
+    f.close()
+
+    # # Code to output predictions without overwriting by using current date time
+    # date, time = mainRBM.get_current_date_and_time()
+    # if not os.path.exists('predictions/{}/'.format(date)):
+    #     os.makedirs('predictions/{}/'.format(date))
 
     # Output CSV
     print('--- Writing to CSV')
@@ -150,8 +176,6 @@ def hyperparameterTuning():
     print("--- Finished hyperparameter tuning ---")
     print("--- Time Taken ---")
     print("--- {} ---".format(end_time-start_time))
-
-    plt.show()
 
 
 # Run main hyperparameter tuning function

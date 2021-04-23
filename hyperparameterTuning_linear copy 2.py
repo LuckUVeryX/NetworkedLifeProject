@@ -23,6 +23,20 @@ c = linearRegression.getc(rBar, trStats["ratings"])
 L = list(np.arange(0, 60, 1))
 # L = list(np.arange(7, 8, 0.1))
 
+def get_plot_dimension():
+    num_plots = len(L)
+    return int(np.ceil(np.sqrt(num_plots)))
+
+
+def update_plot_location(x, y, dimension):
+    if x < dimension - 1:
+        x += 1
+    else:
+        y += 1
+        x = 0
+    return x, y
+
+
 def hyperparameterTuning():
     print("--- Commencing Hyper Parameter Tuning")
     start_time = datetime.now().replace(microsecond=0)
@@ -31,6 +45,15 @@ def hyperparameterTuning():
     train_loss = []
     val_loss = []
     best_val_loss = np.inf
+
+    x = 0
+    y = 0
+
+    plot_dimension = get_plot_dimension()
+    # ! Resize this if training with many different parameters
+    # ? Might want to test with epochs = 1 to see if pdf will fit the plots
+    fig, axs = plt.subplots(
+        plot_dimension, plot_dimension, sharex=True, sharey=True, figsize=(40, 20))
 
     # Loop over the different parameters
     for l in L:
@@ -47,13 +70,14 @@ def hyperparameterTuning():
             best_val_loss = min(val_loss)
             best_hidden_bias = b
 
-    # Plot the evolution of training and validation RMSE
-    plt.plot(train_loss)
-    plt.plot(val_loss)
-    plt.xlabel('l')
-    plt.ylabel('RMSE')
-    plt.title('L {}'.format(l))
-    plt.legend('Training RMSE','Vaildation RMSE')
+        # Plot the evolution of training and validation RMSE
+        axs[x, y].plot(train_loss)
+        axs[x, y].plot(val_loss)
+        axs[x, y].set(xlabel='l', ylabel='RMSE')
+        axs[x, y].set_title('L {}'.format(l))
+
+        # Update the index to plot plots
+        x, y = update_plot_location(x, y, plot_dimension)
 
     # Code to output predictions without overwriting by using current date time
     date, time = linearRegression.get_current_date_and_time()
@@ -70,22 +94,31 @@ def hyperparameterTuning():
     print("--- Predicting ratings...")
     bestPredictedRatings = np.array(
         [linearRegression.predict(trStats["movies"], trStats["u_users"] , rBar, b)])
+
     print("--- Saving predictions")
     np.savetxt("predictions/{}/{}_bestPredictedRatings.txt".format(date, time),
                bestPredictedRatings)
 
-    # Save & Output Plot
+    # Output Plot
+    print("--- Plotting in progress")
+    for ax in axs.flat:
+        ax.label_outer()
+        # make the axis ticks more obvious 
+        ax.xaxis.set_major_locator(plt.MaxNLocator(5))
+        ax.yaxis.set_major_locator(plt.MaxNLocator(5))
+    line_labels = ["Training Loss", "Validation Loss"]
+    fig.legend(labels=line_labels)
+
     print("--- Saving plots...")
     plt.savefig("predictions/{}/{}.pdf".format(date, time))
-
-    print("--- Plotting in progress")
-    plt.show(block = False)
-    plt.close()
 
     end_time = datetime.now().replace(microsecond=0)
     print("--- Finished hyperparameter tuning ---")
     print("--- Time Taken ---")
     print("--- {} ---".format(end_time-start_time))
+
+    # plt.show()
+
 
 # Run main hyperparameter tuning function
 hyperparameterTuning()
