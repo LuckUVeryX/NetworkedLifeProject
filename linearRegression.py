@@ -1,5 +1,9 @@
 import numpy as np
 import projectLib as lib
+import numpy as np
+import projectLib as lib
+from datetime import datetime
+import os
 
 # shape is movie,user,rating
 training = lib.getTrainingData()
@@ -78,7 +82,7 @@ def predict(movies, users, rBar, b):
 
 
 # # Regularised version
-# l = 1
+l = 1
 # b = param_reg(A, c, l)
 
 # Regularised version
