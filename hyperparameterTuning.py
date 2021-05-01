@@ -67,19 +67,19 @@ def hyperparameterTuning():
                             print("--- Training with F {}, initLearningRate {}, decay {}, regularization {}, momentum {}, batchNumber {}".format(
                                 F[a], initialLearningRate[b], learningRateDecay[c], regularization[d], momentum[e], batchNumber[f]))
 
-                        trainLoss, valLoss, trainedWeights, trainedHiddenBias, trainedVisibleBias = mainRBM.main(K=K,
-                                                                                                                 F=F[a],
-                                                                                                                 epochs=epochs,
-                                                                                                                 initialLearningRate=initialLearningRate[
-                                                                                                                     b],
-                                                                                                                 learningRateDecay=learningRateDecay[
-                                                                                                                     c],
-                                                                                                                 regularization=regularization[
-                                                                                                                     d],
-                                                                                                                 momentum=momentum[
-                                                                                                                     e],
-                                                                                                                 batchNumber=batchNumber[
-                                                                                                                     f])
+                        trainLoss, valLoss, trainedWeights, trainedHiddenBias, trainedVisibleBias, best_vlRMSE = mainRBM.main(K=K,
+                                                                                                                              F=F[a],
+                                                                                                                              epochs=epochs,
+                                                                                                                              initialLearningRate=initialLearningRate[
+                                                                                                                              b],
+                                                                                                                              learningRateDecay=learningRateDecay[
+                                                                                                                              c],
+                                                                                                                              regularization=regularization[
+                                                                                                                              d],
+                                                                                                                              momentum=momentum[
+                                                                                                                              e],
+                                                                                                                              batchNumber=batchNumber[
+                                                                                                                              f])
 
                         # Append results in the form of dictionary
                         results.append({"Validation Loss": min(valLoss),
@@ -102,7 +102,7 @@ def hyperparameterTuning():
                         axs[x, y].plot(trainLoss)
                         axs[x, y].plot(valLoss)
                         axs[x, y].set(xlabel='epoch', ylabel='RMSE')
-                        axs[x, y].set_title('F {}, LR {}, Decay {}, Reg {}, Mmt {}'.format(
+                        axs[x, y].set_title('F {}, LR {}, Decay {}, Reg {}, Mmt {}, Batch {}'.format(
                             F[a], initialLearningRate[b], learningRateDecay[c], regularization[d], momentum[e], batchNumber[f]))
 
                         # Update the index to plot plots
