@@ -15,34 +15,26 @@ vlStats = lib.getUsefulStats(validation)
 K = 5
 
 # SET PARAMETERS HERE!!!
-# number of hidden units
-# TODO Hyper parameter tuning F, (number of hidden units)
+
+# Number of hidden units
 F = 15
+
+# Number of epochs
 epochs = 200
 
-# * We are using adaptive learning rate instead of a fixed gradientLearningRate
-# //gradientLearningRate = 0.1
-# * Use this to select ideal learning rate at epoch 1
+# We are using adaptive learning rate instead of a fixed gradientLearningRate
+# Use this to select ideal learning rate at epoch 1
 initialLearningRate = 3
-#  TODO Hyper parameter tuning
-# ? Range from 1 to 5
 learningRateDecay = 0.1
 
-# * Set the regularization strength here
-# TODO Hyper parameter tuning
-# ? Range from 0 to 0.05
+# Regularization 
 regularization = 0.05
 
-# * Momentum
-# TODO Hyper parameter tuning
-# ? 0 to 1
+# Momentum
 momentum = 0.4
 
-# * Mini-Batch
-# TODO Hyper parameter tuning
-# ? 0 to 40 (in multiples of 5)
+# Mini-Batch
 batchNumber = 35
-
 
 def getCurrentDateAndTime():
     now = datetime.now()
@@ -50,8 +42,7 @@ def getCurrentDateAndTime():
     time = now.strftime("%H%M")
     return date, time
 
-
-def main(K, F, epochs, initialLearningRate, learningRateDecay, regularization, momentum, batch_size):
+def main(K, F, epochs, initialLearningRate, learningRateDecay, regularization, momentum, batchNumber):
     best_vlRMSE = 2
     # Initialise all our arrays
     W = rbm.getInitialWeights(trStats["n_movies"], F, K)
@@ -82,7 +73,7 @@ def main(K, F, epochs, initialLearningRate, learningRateDecay, regularization, m
     for epoch in range(1, epochs):
         visitingOrder = np.array(trStats["u_users"])
         np.random.shuffle(visitingOrder)
-        batches = np.array_split(visitingOrder, batch_size)
+        batches = np.array_split(visitingOrder, batchNumber)
 
         for batch in batches:
             # keep track previous gradient for weights
@@ -168,6 +159,7 @@ def main(K, F, epochs, initialLearningRate, learningRateDecay, regularization, m
         valLoss.append(vlRMSE)
 
         # If val loss is lower than what we have seen so far, update the weights and biases
+        # Early stopping implementation
         if valLoss[-1] == min(valLoss):
             trainedWeights = W
             trainedHiddenBias = hidden_bias
@@ -192,7 +184,7 @@ if __name__ == "__main__":
     # * Function to train model
     trainLoss, valLoss, trainedWeights, trainedHiddenBias, trainedVisibleBias, best_vlRMSE = main(K, F, epochs, initialLearningRate, learningRateDecay, regularization, momentum, batchNumber)
         
-    if best_vlRMSE < 1.09:
+    if best_vlRMSE < 1.07:
         print("---Getting Predicting ratings...")
         predictedRatings = np.array([rbm.predictForUserWithBias(user, trainedWeights, trainedHiddenBias, trainedVisibleBias, training) for user in trStats["u_users"]])
 

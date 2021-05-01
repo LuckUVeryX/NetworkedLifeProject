@@ -9,36 +9,27 @@ from datetime import datetime
 
 training = lib.getTrainingData()
 validation = lib.getValidationData()
-# You could also try with the chapter 4 data
-# training = lib.getChapter4Data()
 
 trStats = lib.getUsefulStats(training)
 vlStats = lib.getUsefulStats(validation)
 
-# * Parameters
+# Parameters
 # Ratings from 1-5
 K = 5
 
-epochs = 80
+epochs = 200
 
-# TODO Hyper parameter tuning
-# number of hidden units
+# Hyper parameter tuning
 F = [15, 50]
-
 initialLearningRate = [0.3, 0.1]
-
-# ? Range from 0.01 to 1
 learningRateDecay = [0.3, 0.1]
-
-# ? Range from 0 to 0.05
 regularization = [0.05, 0.1]
-
-# ? 0 to 1
 momentum = [0.9, 0.99]
+batchNumber = [20, 25, 30, 35, 40, 45, 50]
 
 
 def getPlotDimension():
-    num_plots = len(F) * len(initialLearningRate) * len(learningRateDecay) * len(regularization) * len(momentum)
+    num_plots = len(F) * len(initialLearningRate) * len(learningRateDecay) * len(regularization) * len(momentum) * len(batchNumber)
     return int(np.ceil(np.sqrt(num_plots)))
 
 
@@ -72,20 +63,23 @@ def hyperparameterTuning():
             for c in range(len(learningRateDecay)):
                 for d in range(len(regularization)):
                     for e in range(len(momentum)):
-
-                        print("--- Training with F {}, initLearningRate {}, decay {}, regularization {}, momentum {}".format(
-                            F[a], initialLearningRate[b], learningRateDecay[c], regularization[d], momentum[e]))
+                        for f in range(len(batchNumber)):
+                            print("--- Training with F {}, initLearningRate {}, decay {}, regularization {}, momentum {}, batchNumber {}".format(
+                                F[a], initialLearningRate[b], learningRateDecay[c], regularization[d], momentum[e], batchNumber[f]))
 
                         trainLoss, valLoss, trainedWeights, trainedHiddenBias, trainedVisibleBias = mainRBM.main(K=K,
-                                                                                                                 epochs=epochs,
                                                                                                                  F=F[a],
+                                                                                                                 epochs=epochs,
                                                                                                                  initialLearningRate=initialLearningRate[
                                                                                                                      b],
                                                                                                                  learningRateDecay=learningRateDecay[
                                                                                                                      c],
                                                                                                                  regularization=regularization[
                                                                                                                      d],
-                                                                                                                 momentum=momentum[e])
+                                                                                                                 momentum=momentum[
+                                                                                                                     e],
+                                                                                                                 batchNumber=batchNumber[
+                                                                                                                     f])
 
                         # Append results in the form of dictionary
                         results.append({"Validation Loss": min(valLoss),
@@ -93,7 +87,8 @@ def hyperparameterTuning():
                                         "Init Learn Rate": initialLearningRate[b],
                                         "Decay": learningRateDecay[c],
                                         "Regularization": regularization[d],
-                                        "Momentum": momentum[e]
+                                        "Momentum": momentum[e],
+                                        "batchNumber": batchNumber[f]
                                         })
 
                         # Save the weights and biases of the best model
@@ -108,7 +103,7 @@ def hyperparameterTuning():
                         axs[x, y].plot(valLoss)
                         axs[x, y].set(xlabel='epoch', ylabel='RMSE')
                         axs[x, y].set_title('F {}, LR {}, Decay {}, Reg {}, Mmt {}'.format(
-                            F[a], initialLearningRate[b], learningRateDecay[c], regularization[d], momentum[e]))
+                            F[a], initialLearningRate[b], learningRateDecay[c], regularization[d], momentum[e], batchNumber[f]))
 
                         # Update the index to plot plots
                         x, y = updatePlotLocation(x, y, plotDimension)
